@@ -6,4 +6,4 @@
  The Face Recognition Grand Challenge (FRGC) ver2.0 Database
 =============================================================
 
-.. automodule:: xbob.db.gbu
+.. automodule:: xbob.db.frgc

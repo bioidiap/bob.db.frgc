@@ -42,3 +42,5 @@ Enjoy!
 """
 
 from .query import Database
+
+__all__ = ['Database']

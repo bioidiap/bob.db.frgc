@@ -25,9 +25,6 @@ The package is available in two different distribution formats:
 
 a) You can download it from `PyPI <http://pypi.python.org/pypi>`_, or
 b) You can download it in its source form from `its git repository <https://github.com/bioidiap/xbob.db.frgc>`_.
-   When you download the version at the git repository, you will need to run a command to recreate the backend SQLite file required for its operation.
-   This means that the database raw files must be installed somewhere in this case.
-   With option ``1`` you can run in `dummy` mode and only download the raw data files for the database once you are happy with your setup.
 
 You can mix and match points 1/2 and a/b above based on your requirements.
 Here are some examples:

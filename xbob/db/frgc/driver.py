@@ -23,6 +23,7 @@
 import os
 import sys
 import tempfile, shutil
+import argparse
 
 from bob.db import utils
 from bob.db.driver import Interface as BaseInterface
@@ -40,7 +41,7 @@ def dumplist(args):
     return 0
 
   from .query import Database
-  db = Database(args.database)
+  db = Database()
 
   r = db.files(
       directory=args.directory,
@@ -67,7 +68,7 @@ def checkfiles(args):
     return 0
 
   from .query import Database
-  db = Database(args.database)
+  db = Database()
 
   r = db.files(
       directory=args.directory,
@@ -91,6 +92,7 @@ def checkfiles(args):
     output.write('%d files (out of %d) were not found at "%s"\n' % \
         (len(bad), len(r), args.directory))
 
+  return 0
 
 def create_annotation_files(args):
   """Creates the position files for the FRGC database
@@ -108,7 +110,7 @@ def create_annotation_files(args):
     args.directory = tempfile.mkdtemp(prefix='bob_db_frgc_')
 
   from .query import Database
-  db = Database(args.database)
+  db = Database()
 
   # retrieve all files
   annotations = db.annotations(directory=args.directory, extension=args.extension)
@@ -133,6 +135,8 @@ def create_annotation_files(args):
     for args.protocol in ('2.0.1','2.0.2','2.0.4'):
       checkfiles(args)
     shutil.rmtree(args.directory)
+
+  return 0
 
 
 class Interface(BaseInterface):
@@ -170,7 +174,7 @@ class Interface(BaseInterface):
     dump_list_parser.add_argument('-g', '--groups', help="if given, this value will limit the output files to those belonging to a particular group. (defaults to '%(default)s')", choices=('world', 'dev'))
     dump_list_parser.add_argument('-p', '--protocol', default = '2.0.1', help="if given, limits the dump to a particular subset of the data that corresponds to the given protocol (defaults to '%(default)s')", choices=('2.0.1', '2.0.2', '2.0.4'))
     dump_list_parser.add_argument('-u', '--purposes', help="if given, this value will limit the output files to those designed for the given purposes. (defaults to '%(default)s')", choices=('enrol', 'probe'))
-    dump_list_parser.add_argument('--self-test', dest="selftest", action='store_true', help=SUPPRESS)
+    dump_list_parser.add_argument('--self-test', dest="selftest", action='store_true', help=argparse.SUPPRESS)
 
     dump_list_parser.set_defaults(func=dumplist) #action
 
@@ -183,7 +187,7 @@ class Interface(BaseInterface):
     check_files_parser.add_argument('-g', '--groups', help="if given, this value will limit the output files to those belonging to a particular group. (defaults to '%(default)s')", choices=('world', 'dev'))
     check_files_parser.add_argument('-p', '--protocol', default='2.0.1', help="if given, limits the dump to a particular subset of the data that corresponds to the given protocol (defaults to '%(default)s')", choices=('2.0.1', '2.0.2', '2.0.4'))
     check_files_parser.add_argument('-u', '--purposes', help="if given, this value will limit the output files to those designed for the given purposes. (defaults to '%(default)s')", choices=('enrol', 'probe'))
-    check_files_parser.add_argument('--self-test', dest="selftest", action='store_true', help=SUPPRESS)
+    check_files_parser.add_argument('--self-test', dest="selftest", action='store_true', help=argparse.SUPPRESS)
 
     check_files_parser.set_defaults(func=checkfiles) #action
 
@@ -193,6 +197,6 @@ class Interface(BaseInterface):
     create_annotation_files_parser.add_argument('-D', '--database', default=self.frgc_database_directory(), help="The base directory of the FRGC database")
     create_annotation_files_parser.add_argument('-d', '--directory', required=True, help="The eye position files will be stored in this directory")
     create_annotation_files_parser.add_argument('-e', '--extension', default = '.pos', help="if given, this extension will be appended to every entry returned (defaults to '%(default)s')")
-    create_annotation_files_parser.add_argument('--self-test', dest="selftest", action='store_true', help=SUPPRESS)
+    create_annotation_files_parser.add_argument('--self-test', dest="selftest", action='store_true', help=argparse.SUPPRESS)
 
     create_annotation_files_parser.set_defaults(func=create_annotation_files) #action

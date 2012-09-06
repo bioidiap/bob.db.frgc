@@ -23,16 +23,28 @@
 import os, sys
 import unittest
 import bob
+from nose.plugins.skip import SkipTest
+
 
 from . import Database
 
 class FRGCDatabaseTest(unittest.TestCase):
   """Performs some tests on the GBU database."""
 
-  m_db = Database()
+  def setUp(self):
+    from .driver import Interface
+    interface = Interface()
+    if os.path.exists(interface.frgc_database_directory()):
+      self.m_db = Database()
+      self.m_skip_tests = False
+    else:
+      self.m_db_dir = interface.frgc_database_directory()
+      self.m_skip_tests = True
 
   def test_clients(self):
     """Tests that the 'clients()' and 'models()' functions return the desired number of elements"""
+    if self.m_skip_tests:
+      raise SkipTest("The database directory '%s' is not available."%self.m_db_dir)
 
     # the protocols training, dev, idiap
     protocols = self.m_db.m_protocols
@@ -67,6 +79,9 @@ class FRGCDatabaseTest(unittest.TestCase):
 
   def test_files(self):
     """Tests that the 'files()' function returns reasonable output"""
+    if self.m_skip_tests:
+      raise SkipTest("The database directory '%s' is not available."%self.m_db_dir)
+
     # The number of files should always be identical to the number of models...
     protocols = self.m_db.m_protocols
     masks = self.m_db.m_mask_types
@@ -84,6 +99,8 @@ class FRGCDatabaseTest(unittest.TestCase):
 
   def test_file_ids(self):
     """Tests that the client id's returned by the 'get_client_id_from_file_id()' and 'get_client_id_from_model_id()' functions are correct"""
+    if self.m_skip_tests:
+      raise SkipTest("The database directory '%s' is not available."%self.m_db_dir)
 
     # this test might take a while...
     protocol = self.m_db.m_protocols[0]
@@ -96,6 +113,10 @@ class FRGCDatabaseTest(unittest.TestCase):
         self.assertEqual(self.m_db.get_client_id_from_file_id(file_id), client_id)
 
   def test_driver_api(self):
+    """Tests the frgc driver API."""
+    if self.m_skip_tests:
+      raise SkipTest("The database directory '%s' is not available."%self.m_db_dir)
+
     from bob.db.script.dbmanage import main
     self.assertEqual( main(['frgc', 'dumplist', '--self-test']), 0 )
     self.assertEqual( main(['frgc', 'checkfiles', '-d', '.', '--self-test']), 0 )

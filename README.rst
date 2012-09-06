@@ -2,12 +2,16 @@
  The Face Recognition Grand Challenge (FRGC) ver2.0 Database
 =============================================================
 
-TODO: FILL!!!
-
-This package contains the access API and descriptions for `The Good, The Bad, and The Ugly Database <http://www.nist.gov/itl/iad/ig/focs.cfm>`_.
+This package contains the access API and descriptions for `The Face Recognition Grand Challenge (FRGC) Database <http://face.nist.gov/frgc/>`_ in the version ver2.0.
 The actual raw data for the database should be downloaded from the original URL.
 This package only contains the `Bob <http://www.idiap.ch/software/bob/>`_ accessor methods to use the DB directly from python.
-Note that the default protocols *Good*, *Bad*, and *Ugly* as defined in the URL above will be respected.
+Note that currently only the experimental protocols *2.0.1*, *2.0.2*, and *2.0.4* (as defined in the FRGC tests) are implemented.
+
+.. note::
+
+  This database interface requires the original image database to be available at your system.
+  In order for the database interface to work properly, you have to set the path in the ``Interface.frgc_database_directory()`` function of the ``xbob/db/frgc/driver.py`` file to your FRGC image database main directory.
+  For use at Idiap, the right directory is pre-set.
 
 You would normally not install this package unless you are maintaining it.
 What you would do instead is to tie it in at the package you need to **use** it.
@@ -20,7 +24,7 @@ There are a few ways to achieve this:
 The package is available in two different distribution formats:
 
 a) You can download it from `PyPI <http://pypi.python.org/pypi>`_, or
-b) You can download it in its source form from `its git repository <https://github.com/bioidiap/xbob.db.gbu>`_.
+b) You can download it in its source form from `its git repository <https://github.com/bioidiap/xbob.db.frgc>`_.
    When you download the version at the git repository, you will need to run a command to recreate the backend SQLite file required for its operation.
    This means that the database raw files must be installed somewhere in this case.
    With option ``1`` you can run in `dummy` mode and only download the raw data files for the database once you are happy with your setup.
@@ -36,11 +40,11 @@ Edit your ``setup.py`` in your satellite package and add the following entry in 
 
     install_requires=[
       ...
-      "xbob.db.gbu",
+      "xbob.db.frgc",
     ],
 
 Proceed normally with your ``boostrap/buildout`` steps and you should be all set.
-That means you can now import the ``xbob.db.gbu`` namespace into your scripts.
+That means you can now import the ``xbob.db.frgc`` namespace into your scripts.
 
 Modify your buildout.cfg and download from git
 ==============================================
@@ -54,8 +58,8 @@ Your ``buildout.cfg`` file should contain the following lines::
   auto-checkout = *
   eggs = bob
          ...
-         xbob.db.gbu
+         xbob.db.frgc
 
   [sources]
-  xbob.db.gbu = git https://github.com/bioidiap/xbob.db.gbu.git
+  xbob.db.frgc = git https://github.com/bioidiap/xbob.db.frgc.git
   ...

@@ -19,12 +19,12 @@
 
 """
 The FRGC (Face Recognition Grand Challenge) ver2.0 Database is provided by the NIST webpage: http://face.nist.gov/frgc/
-Please contact the responsible person to get your own copy of the database (be aware that it is HUGE).
+Please contact the responsible person to get your own copy of the database (be aware that it is **huge**).
 
 In opposition to other databases, there is no .sql3-file for this database, but instead the XML lists provided in the database are used directly.
-Please specify the directory to your copy of the FRGC database on creation of a ``bob.db.frgc.Database(directory)`` object.
+In order for the database interface to work properly, you have to set the path in the ``Interface.frgc_database_directory()`` function of the ``xbob/db/frgc/driver.py`` file to your FRGC image database main directory.
 
-In order to generate the eye position files (so that the database can be used like any other bob.db database), please call ``bob_dbmanage.py frgc create-position-files --directory <YOUR_PATH>``.
+In order to generate the annotation files (so that the database can be used like any other xbob.db database), please call ``bin/bob_dbmanage.py frgc create-position-files --directory <YOUR_PATH>`` from the main directory of this package.
 
 In opposition to the original FRGC protocols, here only those image files and models that are required by the mask are used.
 This saves some time and space, but ensures identical results.

@@ -24,6 +24,70 @@ import xml.sax
 import os
 import numpy
 
+
+class File:
+  """This class is just the File object that is returned by the objects function.
+  It will be created on need and is not stored anywhere."""
+  def __init__(self, signature, presentation, path):
+    # The required information: The file id, the client id and the path
+    self.id = presentation
+    self.client_id = signature
+    self.path = path
+
+  def __repr__(self):
+    return "File('%s')" % self.path
+
+  def make_path(self, directory=None, extension=None):
+    """Wraps the current path so that a complete path is formed.
+    If directory and extension '.jpg' are specified,
+    extensions are automatically replaced by '.JPG' if necessary.
+
+    Keyword parameters:
+
+    directory
+      An optional directory name that will be prefixed to the returned result.
+
+    extension
+      An optional extension that will be suffixed to the returned filename. The
+      extension normally includes the leading ``.`` character as in ``.jpg`` or
+      ``.hdf5``.
+
+    Returns a string containing the newly generated file path.
+    """
+    if not directory: directory = ''
+    if not extension: extension = ''
+
+    # if extension is '.jpg', we have to check if we need to change it to '.JPG'
+    full_path = os.path.join(directory, self.path + extension)
+    if extension == '.jpg' and not os.path.isfile(full_path):
+      capital_path = os.path.join(directory, self.path + '.JPG')
+      if os.path.exists(capital_path):
+        return capital_path
+    return full_path
+
+  def save(self, data, directory=None, extension='.hdf5'):
+    """Saves the input data at the specified location and using the given
+    extension.
+
+    Keyword parameters:
+
+    data
+      The data blob to be saved (normally a :py:class:`numpy.ndarray`).
+
+    directory
+      If not empty or None, this directory is prefixed to the final file
+      destination
+
+    extension
+      The extension of the filename - this will control the type of output and
+      the codec for saving the input blob.
+    """
+    path = self.make_path(directory, extension)
+    bob.utils.makedirs_safe(os.path.dirname(path))
+    bob.io.save(data, path)
+
+
+
 # Global model index. This model index is generated on the fly and should not be stored between sessions.
 global model_index
 model_index = 1
@@ -32,19 +96,19 @@ class FRGCFile:
   """This class holds all desired information about a specific file, or set of files"""
   def __init__(self, signature):
     # the client id
-    self.m_client_id = signature
-    # a unique model index
+    self.m_signature = signature
+    # a unique model id, which is generated on the fly
     global model_index
     self.m_model = model_index
     model_index += 1
-    # the files: map from record id to file name (w/o extension)
+    # the files: map from record id to path (w/o file extension)
     self.m_files = {}
-    self.m_extensions = {}
 
-  def add(self, presentation, file):
+  def add(self, presentation, path):
+    # add the path to the list of files for this file (list)
     assert presentation not in self.m_files
-    self.m_files[presentation] = os.path.splitext(file)[0]
-    self.m_extensions[presentation] = os.path.splitext(file)[1]
+    self.m_files[presentation] = os.path.splitext(path)[0]
+
 
 class ListFileReader (xml.sax.handler.ContentHandler):
   """Class for reading the FRGC xml image file lists"""
@@ -77,13 +141,12 @@ class ListFileReader (xml.sax.handler.ContentHandler):
       pass
 
 
-
-class PositionFileReader (xml.sax.handler.ContentHandler):
+class AnnotationFileReader (xml.sax.handler.ContentHandler):
   """Class for reading the FRGC metadata list"""
   def __init__(self):
-    self.m_positions = [-1]*8
+    self.m_annotations = {}
     self.m_signature = None
-    self.m_position_map = {}
+    self.m_annotation_map = {}
 
   def startDocument(self):
     pass
@@ -95,32 +158,32 @@ class PositionFileReader (xml.sax.handler.ContentHandler):
     if name == 'Recording':
       assert self.m_signature == None
       self.m_signature = attrs['recording_id']
-      self.m_positions = {}
+      self.m_annotations = {}
       self.m_use_recording = False
     elif name == 'LeftEyeCenter':
-      self.m_positions['leye'] = (int(attrs['y']), int(attrs['x']))
+      self.m_annotations['leye'] = (int(attrs['y']), int(attrs['x']))
       self.m_use_recording = True
     elif name == 'RightEyeCenter':
-      self.m_positions['reye'] = (int(attrs['y']), int(attrs['x']))
+      self.m_annotations['reye'] = (int(attrs['y']), int(attrs['x']))
     elif name == 'Nose':
-      self.m_positions['nose'] = (int(attrs['y']), int(attrs['x']))
+      self.m_annotations['nose'] = (int(attrs['y']), int(attrs['x']))
     elif name == 'Mouth':
-      self.m_positions['mouth'] = (int(attrs['y']), int(attrs['x']))
+      self.m_annotations['mouth'] = (int(attrs['y']), int(attrs['x']))
     else: # other name
       pass
 
   def endElement(self, name):
     if name == 'Recording':
       assert self.m_signature
-      assert self.m_signature not in self.m_position_map
+      assert self.m_signature not in self.m_annotation_map
       # add a file(s) to the list
-      if all(self.m_positions) >= 0:
-        self.m_position_map[self.m_signature] = self.m_positions
+      if self.m_use_recording:
+        assert len(self.m_annotations) == 4
+        self.m_annotation_map[self.m_signature] = self.m_annotations
       # new identity
       self.m_signature = None
     else: # other name
       pass
-
 
 
 def read_mask(mask_file):
@@ -165,7 +228,6 @@ xml_files = {'world':'FRGC_Exp_2.0.1_Training.xml',
 known_lists = {'world':None,
                'dev':{'2.0.1':None, '2.0.2':None, '2.0.4':{'enrol':None, 'probe':None}}}
 
-
 # collector for files and models that have been read
 file_dict = {}
 model_dict = {}
@@ -185,8 +247,8 @@ def get_list(base_dir, group, protocol=None, purpose=None):
       # integrate in dicts
       for g in list:
         for k,v in g.m_files.iteritems():
-          file_dict[k] = g.m_client_id
-        model_dict[g.m_model] = g.m_client_id
+          file_dict[k] = g.m_signature
+        model_dict[g.m_model] = g.m_signature
 
     return list
 
@@ -212,6 +274,8 @@ def client_from_model(model_id):
   assert model_id in model_dict
   return model_dict[model_id]
 
+
+
 ###############################################################
 ##### masks ###################################################
 
@@ -236,25 +300,25 @@ def get_mask(base_dir, protocol, mask_type):
 
 
 ###############################################################
-##### positions ###############################################
+##### annotations ###############################################
 
 # static collector of the annotations
-global positions
-positions = None
+global annotations
+annotations = None
 
-def get_positions(base_dir, file_id):
+def get_annotations(base_dir, file_id):
   """Returns the eye, mouth and nose positions for the given file id."""
-  global positions
+  global annotations
   # check if annotations need to be read
-  if not positions:
+  if not annotations:
     # read annotations file
     metadata_file = os.path.join(base_dir, "BEE_DIST/FRGC2.0/metadata/FRGC_2.0_Metadata.xml")
     if not os.path.exists(metadata_file):
       raise xml.sax.SAXException("Could not find the metadata file '%s'. Your FRGC base directory '%s' seems to be wrong or incomplete."%(metadata_file, base_dir))
 #    print "Reading positions file '" + metadata_file + "'"
-    position_reader = PositionFileReader()
-    xml.sax.parse(metadata_file, position_reader)
-    positions = position_reader.m_position_map
+    annotation_reader = AnnotationFileReader()
+    xml.sax.parse(metadata_file, annotation_reader)
+    annotations = annotation_reader.m_annotation_map
 
-  return positions[file_id]
+  return annotations[file_id]
 

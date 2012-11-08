@@ -23,26 +23,27 @@
 import os, sys
 import unittest
 import bob
+import random
 from nose.plugins.skip import SkipTest
 
 
-from . import Database
+import xbob.db.frgc
 
 class FRGCDatabaseTest(unittest.TestCase):
-  """Performs some tests on the GBU database."""
+  """Performs some tests on the FRGC database."""
 
   def setUp(self):
-    from .driver import Interface
-    interface = Interface()
+    interface = xbob.db.frgc.driver.Interface()
     if os.path.exists(interface.frgc_database_directory()):
-      self.m_db = Database()
+      self.m_db = xbob.db.frgc.Database()
       self.m_skip_tests = False
     else:
       self.m_db_dir = interface.frgc_database_directory()
       self.m_skip_tests = True
 
-  def test_clients(self):
-    """Tests that the 'clients()' and 'models()' functions return the desired number of elements"""
+
+  def test_client_ids(self):
+    # Tests that the 'client_ids()' and 'model_ids()' functions return the desired number of elements.
     if self.m_skip_tests:
       raise SkipTest("The database directory '%s' is not available."%self.m_db_dir)
 
@@ -50,70 +51,88 @@ class FRGCDatabaseTest(unittest.TestCase):
     protocols = self.m_db.m_protocols
 
     # client counter
-    self.assertEqual(len(self.m_db.clients(groups='world')), 222)
+    self.assertEqual(len(self.m_db.client_ids(groups='world')), 222)
     for protocol in protocols:
-      self.assertEqual(len(self.m_db.clients(protocol=protocol)), 535)
-      self.assertEqual(len(self.m_db.clients(groups='dev', protocol=protocol)), 466)
+      self.assertEqual(len(self.m_db.client_ids(protocol=protocol)), 535)
+      self.assertEqual(len(self.m_db.client_ids(groups='dev', protocol=protocol)), 466)
 
     # for different mask types, the client counters of 'enrol' and 'probe' are different
     for protocol in protocols:
-      self.assertEqual(len(self.m_db.clients(groups='dev', protocol=protocol, purposes='enrol', mask_type='maskI')), 466)
-      self.assertEqual(len(self.m_db.clients(groups='dev', protocol=protocol, purposes='probe', mask_type='maskI')), 450)
-      self.assertEqual(len(self.m_db.clients(groups='dev', protocol=protocol, purposes='enrol', mask_type='maskII')), 466)
-      self.assertEqual(len(self.m_db.clients(groups='dev', protocol=protocol, purposes='probe', mask_type='maskII')), 461)
-      self.assertEqual(len(self.m_db.clients(groups='dev', protocol=protocol, purposes='enrol', mask_type='maskIII')), 370)
-      self.assertEqual(len(self.m_db.clients(groups='dev', protocol=protocol, purposes='probe', mask_type='maskIII')), 345)
+      self.assertEqual(len(self.m_db.client_ids(groups='dev', protocol=protocol, purposes='enrol', mask_type='maskI')), 466)
+      self.assertEqual(len(self.m_db.client_ids(groups='dev', protocol=protocol, purposes='probe', mask_type='maskI')), 450)
+      self.assertEqual(len(self.m_db.client_ids(groups='dev', protocol=protocol, purposes='enrol', mask_type='maskII')), 466)
+      self.assertEqual(len(self.m_db.client_ids(groups='dev', protocol=protocol, purposes='probe', mask_type='maskII')), 461)
+      self.assertEqual(len(self.m_db.client_ids(groups='dev', protocol=protocol, purposes='enrol', mask_type='maskIII')), 370)
+      self.assertEqual(len(self.m_db.client_ids(groups='dev', protocol=protocol, purposes='probe', mask_type='maskIII')), 345)
 
     # check the number of models
-    self.assertEqual(len(self.m_db.models(groups='world')), 12776)
-    self.assertEqual(len(self.m_db.models(groups='dev', protocol='2.0.1', mask_type='maskI')), 14628)
-    self.assertEqual(len(self.m_db.models(groups='dev', protocol='2.0.2', mask_type='maskI')), 3657)
-    self.assertEqual(len(self.m_db.models(groups='dev', protocol='2.0.4', mask_type='maskI')), 14628)
-    self.assertEqual(len(self.m_db.models(groups='dev', protocol='2.0.1', mask_type='maskII')), 15336)
-    self.assertEqual(len(self.m_db.models(groups='dev', protocol='2.0.2', mask_type='maskII')), 3834)
-    self.assertEqual(len(self.m_db.models(groups='dev', protocol='2.0.4', mask_type='maskII')), 15336)
-    self.assertEqual(len(self.m_db.models(groups='dev', protocol='2.0.1', mask_type='maskIII')), 7572)
-    self.assertEqual(len(self.m_db.models(groups='dev', protocol='2.0.2', mask_type='maskIII')), 1893)
-    self.assertEqual(len(self.m_db.models(groups='dev', protocol='2.0.4', mask_type='maskIII')), 7572)
+    self.assertEqual(len(self.m_db.model_ids(groups='world')), 12776)
+    self.assertEqual(len(self.m_db.model_ids(groups='dev', protocol='2.0.1', mask_type='maskI')), 14628)
+    self.assertEqual(len(self.m_db.model_ids(groups='dev', protocol='2.0.2', mask_type='maskI')), 3657)
+    self.assertEqual(len(self.m_db.model_ids(groups='dev', protocol='2.0.4', mask_type='maskI')), 14628)
+    self.assertEqual(len(self.m_db.model_ids(groups='dev', protocol='2.0.1', mask_type='maskII')), 15336)
+    self.assertEqual(len(self.m_db.model_ids(groups='dev', protocol='2.0.2', mask_type='maskII')), 3834)
+    self.assertEqual(len(self.m_db.model_ids(groups='dev', protocol='2.0.4', mask_type='maskII')), 15336)
+    self.assertEqual(len(self.m_db.model_ids(groups='dev', protocol='2.0.1', mask_type='maskIII')), 7572)
+    self.assertEqual(len(self.m_db.model_ids(groups='dev', protocol='2.0.2', mask_type='maskIII')), 1893)
+    self.assertEqual(len(self.m_db.model_ids(groups='dev', protocol='2.0.4', mask_type='maskIII')), 7572)
 
 
-  def test_files(self):
-    """Tests that the 'files()' function returns reasonable output"""
+  def test_objects(self):
+    # Tests that the 'objects()' function returns reasonable output.
     if self.m_skip_tests:
       raise SkipTest("The database directory '%s' is not available."%self.m_db_dir)
 
-    # The number of files should always be identical to the number of models...
+    # The number of objects should always be identical to the number of models...
     protocols = self.m_db.m_protocols
     masks = self.m_db.m_mask_types
 
-    self.assertEqual(len(self.m_db.files(groups='world')), len(self.m_db.models(groups='world')))
+    self.assertEqual(len(self.m_db.objects(groups='world')), len(self.m_db.model_ids(groups='world')))
 
     for mask in masks:
+      # the number of models and model files should be identical for protocol 1 and 4
       for protocol in ('2.0.1', '2.0.4'):
-        self.assertEqual(len(self.m_db.files(groups='dev', protocol=protocol, purposes='enrol', mask_type=mask)),
-                         len(self.m_db.models(groups='dev', protocol=protocol, mask_type=mask)))
+        self.assertEqual(len(self.m_db.objects(groups='dev', protocol=protocol, purposes='enrol', mask_type=mask)),
+                         len(self.m_db.model_ids(groups='dev', protocol=protocol, mask_type=mask)))
 
-      # for protocol 4, there are 4 files for each model
-      self.assertEqual(len(self.m_db.files(groups='dev', protocol='2.0.2', purposes='enrol', mask_type=mask)),
-                       len(self.m_db.models(groups='dev', protocol='2.0.2', mask_type=mask)) * 4)
+      # for protocol 2, there are 4 files for each model
+      self.assertEqual(len(self.m_db.objects(groups='dev', protocol='2.0.2', purposes='enrol', mask_type=mask)),
+                       len(self.m_db.model_ids(groups='dev', protocol='2.0.2', mask_type=mask)) * 4)
+
+    # the number of probes actually differ between the masks, and between the protocols
+    self.assertEqual(len(self.m_db.objects(groups='dev', protocol='2.0.1', purposes='probe', mask_type='maskI')), 14612)
+    self.assertEqual(len(self.m_db.objects(groups='dev', protocol='2.0.1', purposes='probe', mask_type='maskII')), 15392)
+    self.assertEqual(len(self.m_db.objects(groups='dev', protocol='2.0.1', purposes='probe', mask_type='maskIII')), 8456)
+    self.assertEqual(len(self.m_db.objects(groups='dev', protocol='2.0.2', purposes='probe', mask_type='maskI')), 14612)
+    self.assertEqual(len(self.m_db.objects(groups='dev', protocol='2.0.2', purposes='probe', mask_type='maskII')), 15392)
+    self.assertEqual(len(self.m_db.objects(groups='dev', protocol='2.0.2', purposes='probe', mask_type='maskIII')), 8456)
+    self.assertEqual(len(self.m_db.objects(groups='dev', protocol='2.0.4', purposes='probe', mask_type='maskI')), 7306)
+    self.assertEqual(len(self.m_db.objects(groups='dev', protocol='2.0.4', purposes='probe', mask_type='maskII')), 7696)
+    self.assertEqual(len(self.m_db.objects(groups='dev', protocol='2.0.4', purposes='probe', mask_type='maskIII')), 4228)
+
+    # as far as I know, the number of probes should be identical for each model...
+    for model_id in random.sample(self.m_db.model_ids(groups='dev', protocol='2.0.4', mask_type='maskIII'), 50):
+      self.assertEqual(len(self.m_db.objects(groups='dev', protocol='2.0.4', purposes='probe', mask_type='maskIII', model_ids=model_id)), 4228)
+
 
   def test_file_ids(self):
-    """Tests that the client id's returned by the 'get_client_id_from_file_id()' and 'get_client_id_from_model_id()' functions are correct"""
+    # Tests that the client id's returned by the 'get_client_id_from_file_id()' and 'get_client_id_from_model_id()' functions are correct.
     if self.m_skip_tests:
       raise SkipTest("The database directory '%s' is not available."%self.m_db_dir)
 
     # this test might take a while...
     protocol = self.m_db.m_protocols[0]
     # extract all models
-    for model_id in self.m_db.models(groups='dev', protocol=protocol):
+    for model_id in random.sample(self.m_db.model_ids(groups='dev', protocol=protocol), 100):
       # get the client id of the model
       client_id = self.m_db.get_client_id_from_model_id(model_id)
       # check that all files with the same model id share the same client id
-      for file_id in self.m_db.files(groups='dev', protocol=protocol, model_ids=(model_id,), purposes='enrol'):
-        self.assertEqual(self.m_db.get_client_id_from_file_id(file_id), client_id)
+      for file in self.m_db.objects(groups='dev', protocol=protocol, model_ids=(model_id,), purposes='enrol'):
+        self.assertEqual(self.m_db.get_client_id_from_file_id(file.id), client_id)
+
 
   def test_driver_api(self):
-    """Tests the frgc driver API."""
+    # Tests the frgc driver API.
     if self.m_skip_tests:
       raise SkipTest("The database directory '%s' is not available."%self.m_db_dir)
 

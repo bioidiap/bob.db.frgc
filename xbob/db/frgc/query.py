@@ -21,7 +21,7 @@
 FRGC database in the most obvious ways.
 """
 
-from .models import get_list, get_mask, get_positions, client_from_file, client_from_model
+from .models import get_list, get_mask, get_annotations, client_from_file, client_from_model, File
 
 from .driver import Interface
 interface = Interface()
@@ -33,11 +33,11 @@ class Database(object):
   using the common xbob.db API.
   """
 
-  def __init__(self):
-    self.m_base_dir = interface.frgc_database_directory()
+  def __init__(self, base_dir = interface.frgc_database_directory()):
+    self.m_base_dir = base_dir
     # check that the database directory exists
     if not os.path.exists(self.m_base_dir):
-      raise ValueError("The database directory '%s' does not exist. Please correct the path in the Interface.frgc_database_directory() function of the xbob/db/frgc/driver.py file."%base_dir)
+      raise ValueError("The database directory '%s' does not exist. Please choose the correct path, or correct the path in the Interface.frgc_database_directory() function of the xbob/db/frgc/driver.py file."%base_dir)
 
     self.m_groups  = ('world', 'dev')
     self.m_purposes = ('enrol', 'probe')
@@ -56,7 +56,7 @@ class Database(object):
     return elements
 
   def __check_single__(self, element, description, possibilities):
-    """Checks validity of user input data against a set of valid values"""
+    """Checks that the given element is part of the possibilities."""
     if not element:
       raise RuntimeError, 'Please select one element from %s for %s' % (possibilities, description)
     if isinstance(element,tuple) or isinstance (element,list):
@@ -66,35 +66,9 @@ class Database(object):
     if element not in possibilities:
       raise RuntimeError, 'The given %s "%s" is not allowed. Please choose one of %s' % (description, element, possibilities)
 
-  def __make_path__(self, stem, directory, extension, replacement=None):
-    """Generates the file name for the given file name.
-    If directory and extension '.jpg' are specified,
-    extensions are automatically replaced by '.JPG' if necessary."""
-    if not extension:
-      extension = ''
-    if replacement and extension == '.jpg':
-      extension = replacement
-    if directory:
-      return os.path.join(directory, stem + extension)
-    return stem + extension
 
-    if directory:
-      if not extension:
-        return os.path.join(directory, stem)
-      full_path = os.path.join(directory, stem + extension)
-      if extension == '.jpg' and not os.path.exists(full_path):
-        capital_path = os.path.join(directory, stem + '.JPG')
-        if os.path.exists(capital_path):
-          return capital_path
-      return full_path
-
-    if not extension:
-      return stem
-    return stem + extension
-
-
-  def clients(self, groups=None, protocol=None, purposes=None, mask_type='maskIII'):
-    """Returns a set of clients for the specific query by the user.
+  def client_ids(self, groups=None, protocol=None, purposes=None, mask_type='maskIII'):
+    """Returns a list of client ids for the specific query by the user.
 
     Keyword Parameters:
 
@@ -115,14 +89,13 @@ class Database(object):
 
     Returns: A list containing all the client id's which have the given properties.
     """
-
     groups = self.__check_validity__(groups, "group", self.m_groups)
 
     retval = set()
 
     if 'world' in groups:
       for file in get_list(self.m_base_dir, 'world', protocol):
-        retval.add(file.m_client_id)
+        retval.add(file.m_signature)
 
     if 'dev' in groups:
       # validity checks
@@ -138,21 +111,20 @@ class Database(object):
         for index in range(len(files)):
           # check if this model is used by the mask
           if (mask[:,index] > 0).any():
-            retval.add(files[index].m_client_id)
+            retval.add(files[index].m_signature)
 
       if 'probe' in purposes:
         files = get_list(self.m_base_dir, 'dev', protocol, purpose='probe')
         for index in range(len(files)):
           # check if this probe is used by the mask
           if (mask[index,:] > 0).any():
-            retval.add(files[index].m_client_id)
-
+            retval.add(files[index].m_signature)
 
     return sorted(list(retval))
 
 
-  def models(self, groups=None, protocol=None, mask_type='maskIII'):
-    """Returns a set of models for the specific query by the user.
+  def model_ids(self, groups=None, protocol=None, mask_type='maskIII'):
+    """Returns a set of model ids for the specific query by the user.
 
     The models are dependent on the protocol and the mask.
     Only those FRGC "target" files are returned that are required by the given mask!
@@ -175,7 +147,6 @@ class Database(object):
 
     Returns: A list containing all the model id's belonging to the given group.
     """
-
     groups = self.__check_validity__(groups, "group", self.m_groups)
     # for models, purpose is always 'enrol'
     purpose = 'enrol'
@@ -195,7 +166,7 @@ class Database(object):
         if (mask[:,index] > 0).any():
           retval.add(files[index].m_model)
 
-    return retval
+    return sorted(list(retval))
 
 
   def get_client_id_from_model_id(self, model_id):
@@ -212,7 +183,6 @@ class Database(object):
 
     Returns: The client_id attached to the given model_id
     """
-
     return client_from_model(model_id)
 
 
@@ -231,28 +201,13 @@ class Database(object):
 
     Returns: The client_id attached to the given file_id
     """
-
     return client_from_file(file_id)
 
 
-  def objects(self, directory=None, extension=None, groups=None, protocol=None, purposes=None, model_ids=None, mask_type='maskIII'):
-    """Using the specified restrictions, this function returns a dictionary from file_ids to a tuple containing:
-
-    * 0: the resolved filename
-    * 1: the model id (if one (and only one) model_id is given, it is copied here, otherwise the model id of the file)
-    * 2: the claimed client id attached to the model (in case of the AR database: identical to 1)
-    * 3: the real client id (for a probe image, the client id of the probe, otherwise identical to 1)
-    * 4: the "stem" path (basename of the file; in case of the AR database: identical to the file id)
+  def objects(self, groups=None, protocol=None, purposes=None, model_ids=None, mask_type='maskIII'):
+    """Using the specified restrictions, this function returns a list of File objects.
 
     Keyword Parameters:
-
-    directory
-      A directory name that will be prepended to all file paths.
-
-    extension
-      A filename extension that will be appended to all file paths.
-      If the extension is '.jpg', but the expected extension is '.JPG',
-      the extension is automatically corrected.
 
     groups
       One or several groups to which the models belong ('world', 'dev').
@@ -272,28 +227,30 @@ class Database(object):
       belonging to the specified model id is returned.
 
       .. warning ::
-        When querying objects of group 'world', model ids are expected to be client ids (returned by 'clients()'),
-        whereas for group 'dev' model ids are real model ids (as returned by 'models()')
+        When querying objects of group 'world', model ids are expected to be client ids (as returned by 'client_ids()'),
+        whereas for group 'dev' model ids are real model ids (as returned by 'model_ids()')
 
     mask_type
       One of the mask types ('maskI', 'maskII', 'maskIII').
-
     """
+    def extend_file_list(file_list, frgc_file):
+      """Extends the given file list with File's created from the given FRGCFile."""
+      file_list.extend([File(frgc_file.m_signature, presentation, frgc_file.m_files[presentation]) for presentation in frgc_file.m_files])
 
     # check that every parameter is as expected
     groups = self.__check_validity__(groups, "group", self.m_groups)
 
-    if isinstance(model_ids, str):
+    if isinstance(model_ids, int):
       model_ids = (model_ids,)
 
-    retval = {}
+    retval = []
 
     if 'world' in groups:
       # extract training files
       for file in get_list(self.m_base_dir, 'world'):
-        if not model_ids or file.m_client_id in model_ids:
+        if not model_ids or file.m_signature in model_ids:
           for id, path in file.m_files.items():
-            retval[id] = (self.__make_path__(path, directory, extension, file.m_extensions[id]), file.m_model, file.m_client_id, file.m_client_id, path)
+            extend_file_list(retval, file)
 
     if 'dev' in groups:
       # check protocol, mask, and purposes only in group dev
@@ -311,193 +268,30 @@ class Database(object):
           if not model_ids or model.m_model in model_ids:
             # test if the model is used by this mask
             if (mask[:,model_index] > 0).any():
-              for id, path in model.m_files.items():
-                retval[id] = (self.__make_path__(path, directory, extension, model.m_extensions[id]), model.m_model, model.m_client_id, model.m_client_id, path)
+              extend_file_list(retval, model)
 
       if 'probe' in purposes:
         probe_files = get_list(self.m_base_dir, 'dev', protocol, 'probe')
+        # assure that every probe file is returned only once
+        probe_indices = range(len(probe_files))
 
-        if model_ids:
-          # select only that files that belong to the models of with the given ids
-          model_files = get_list(self.m_base_dir, 'dev', protocol, 'enrol')
-          mask = get_mask(self.m_base_dir, protocol, mask_type)
+        # select only that files that belong to the models of with the given ids,
+        # or to any model if no model id is specified
+        model_files = get_list(self.m_base_dir, 'dev', protocol, 'enrol')
+        mask = get_mask(self.m_base_dir, protocol, mask_type)
 
-          for model_index in range(len(model_files)):
-            model = model_files[model_index]
-            if model.m_model in model_ids:
-              for probe_index in range(len(probe_files)):
-                if mask[probe_index, model_index]:
-                  probe = probe_files[probe_index]
-                  for id, path in probe.m_files.items():
-                    retval[id] = (self.__make_path__(path, directory, extension, probe.m_extensions[id]), model.m_model , model.m_client_id, probe.m_client_id, path)
-
-        else: # no model_ids
-          # simply get all the probe files
-          for file in probe_files:
-            for id, path in file.m_files.items():
-              retval[id] = (self.__make_path__(path, directory, extension, file.m_extensions[id]), file.m_model, file.m_client_id, file.m_client_id, path)
+        for model_index in range(len(model_files)):
+          model = model_files[model_index]
+          if not model_ids or model.m_model in model_ids:
+            probe_indices_for_this_model = probe_indices[:]
+            for probe_index in probe_indices_for_this_model:
+              if mask[probe_index, model_index]:
+                extend_file_list(retval, probe_files[probe_index])
+                probe_indices.remove(probe_index)
 
     return retval
 
 
-  def files(self, directory=None, extension=None, groups=None, protocol=None, purposes=None, model_ids=None, mask_type='maskIII'):
-    """Returns a dictionary from file_ids to file paths using the specified restrictions:
-
-    Keyword Parameters:
-
-    directory
-      A directory name that will be prepended to all file paths.
-
-    extension
-      A filename extension that will be appended to all file paths.
-      If the extension is '.jpg', but the expected extension is '.JPG',
-      the extension is automatically corrected.
-
-    groups
-      One or several groups to which the models belong ('world', 'dev').
-      'world' files are "Training", whereas 'dev' files are "Target" and/or "Query".
-
-    protocol
-      One of the FRGC protocols ('2.0.1', '2.0.2', '2.0.4').
-      Needs to be specified, when 'dev' is amongst the groups.
-
-    purposes
-      One or several groups for which files should be retrieved ('enrol', 'probe').
-      Only used when the group is 'dev'·
-      In FRGC terms, 'enrol' is "Target", while 'probe' is "Target" (protocols '2.0.1' and '2.0.2') or "Query" (protocol '2.0.4')
-
-    model_ids
-      If given (as a list of model id's or a single one), only the files
-      belonging to the specified model id is returned.
-
-      .. warning ::
-        When querying objects of group 'world', model ids are expected to be client ids (returned by 'clients()'),
-        whereas for group 'dev' model ids are real model ids (as returned by 'models()')
-
-    mask_type
-      One of the mask types ('maskI', 'maskII', 'maskIII').
-
-    """
-
-    # retrieve the objects
-    objects = self.objects(directory, extension, groups, protocol, purposes, model_ids, mask_type)
-    # return the file names only
-    files = {}
-    for file_id, object in objects.iteritems():
-      files[file_id] = object[0]
-
-    return files
-
-
-  def annotations(self, directory=None, extension=None, groups=None, protocols=None, purposes=None):
-    """Returns a list of dictionary of the annotations  (positions of right eye ('reye'), left eye ('leye'), mouth ('mouth'), nose ('nose')) for the given query.
-
-    Returns:
-
-      A dictionary with the file id as key and:
-
-      * 1: The resolved file name
-      * 2: The positions in a dictionary: 'reye':(y,x), 'leye':(y,x), 'mouth':(y,x), 'nose':(y,x)
-
-    Keyword Parameters:
-
-    directory
-      A directory name that will be prepended to all file paths
-
-    extension
-      A filename extension that will be appended to all file paths
-
-    groups
-      One or several groups to which the models belong ('world', 'dev').
-      'world' files are "Training", whereas 'dev' files are "Target" and/or "Query".
-
-    protocols
-      One or more of the FRGC protocols ('2.0.1', '2.0.2', '2.0.4').
-      If not specified, all protocols are considered.
-      Ignored for the 'world' group.
-
-    purposes
-      One or several groups for which files should be retrieved ('enrol', 'probe').
-      Only used when the group is 'dev'·
-      Here, 'enrol' is "Target", while probe is "Target" (protocols '2.0.1' and '2.0.2') or "Query" (protocol '2.0.4')
-
-    """
-
-    # check that every parameter is as expected
-    groups = self.__check_validity__(groups, "group", self.m_groups)
-    protocols = self.__check_validity__(protocols, "protocol", self.m_protocols)
-    purposes = self.__check_validity__(purposes, "purpose", self.m_purposes)
-
-    positions = {}
-
-    for protocol in protocols:
-      if 'world' in groups:
-        for file in get_list(self.m_base_dir, 'world'):
-          for id, path in file.m_files.items():
-            positions[id] = (self.__make_path__(path, directory, extension), get_positions(self.m_base_dir, id))
-
-      if 'dev' in groups:
-        for purpose in purposes:
-          for file in get_list(self.m_base_dir, 'dev', protocol, purpose):
-            for id, path in file.m_files.items():
-              positions[id] = (self.__make_path__(path, directory, extension), get_positions(self.m_base_dir, id))
-
-    return positions
-
-
-  def save_one(self, file_id, obj, directory, extension):
-    """Saves a single object supporting the bob save() protocol.
-
-    This method will call save() on the given object using the correct
-    database filename stem for the given id.
-
-    .. warning::
-
-      This function is NOT IMPLEMENTED!
-
-    Keyword Parameters:
-
-    file_id
-      The file_id of the object.
-
-    obj
-      The object that needs to be saved, respecting the bob save() protocol.
-
-    directory
-      This is the base directory to which you want to save the data. The
-      directory is tested for existence and created if it is not there with
-      os.makedirs().
-
-    extension
-      The extension determines the way the object will be saved.
-    """
-
-    # The implementation of this function is most probably ugly.
-    # Hence, I don't do it. Ask me if you need this function to be implemented.
-    raise NotImplementedError("Implement me!")
-
-  def save(self, data, directory, extension):
-    """This method takes a dictionary of data and
-    saves it respecting to the given directory.
-
-    .. warning::
-
-      This function is NOT IMPLEMENTED!
-
-    Keyword Parameters:
-
-    data
-      A dictionary from file_id to the actual data to be saved.
-
-    directory
-      This is the base directory to which you want to save the data. The
-      directory is tested for existence and created if it is not there with
-      os.makedirs()
-
-    extension
-      The extension determines the way the data will be saved.
-    """
-
-    # The implementation of this function is most probably ugly.
-    # Hence, I don't do it. Ask me if you need this function to be implemented.
-    raise NotImplementedError("Implement me!")
+  def annotations(self, file_id):
+    """Returns the annotations for the given file id as a dictionary {'reye':(y,x), 'leye':(y,x), 'mouth':(y,x), 'nose':(y,x)}."""
+    return get_annotations(self.m_base_dir, file_id)

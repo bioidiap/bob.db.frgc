@@ -42,7 +42,7 @@ class FRGCDatabaseTest(unittest.TestCase):
       self.m_skip_tests = True
 
 
-  def test_client_ids(self):
+  def test01_client_ids(self):
     # Tests that the 'client_ids()' and 'model_ids()' functions return the desired number of elements.
     if self.m_skip_tests:
       raise SkipTest("The database directory '%s' is not available."%self.m_db_dir)
@@ -78,7 +78,7 @@ class FRGCDatabaseTest(unittest.TestCase):
     self.assertEqual(len(self.m_db.model_ids(groups='dev', protocol='2.0.4', mask_type='maskIII')), 7572)
 
 
-  def test_objects(self):
+  def test02_objects(self):
     # Tests that the 'objects()' function returns reasonable output.
     if self.m_skip_tests:
       raise SkipTest("The database directory '%s' is not available."%self.m_db_dir)
@@ -115,7 +115,7 @@ class FRGCDatabaseTest(unittest.TestCase):
       self.assertEqual(len(self.m_db.objects(groups='dev', protocol='2.0.4', purposes='probe', mask_type='maskIII', model_ids=model_id)), 4228)
 
 
-  def test_file_ids(self):
+  def test03_file_ids(self):
     # Tests that the client id's returned by the 'get_client_id_from_file_id()' and 'get_client_id_from_model_id()' functions are correct.
     if self.m_skip_tests:
       raise SkipTest("The database directory '%s' is not available."%self.m_db_dir)
@@ -131,7 +131,7 @@ class FRGCDatabaseTest(unittest.TestCase):
         self.assertEqual(self.m_db.get_client_id_from_file_id(file.id), client_id)
 
 
-  def test_driver_api(self):
+  def test04_driver_api(self):
     # Tests the frgc driver API.
     if self.m_skip_tests:
       raise SkipTest("The database directory '%s' is not available."%self.m_db_dir)

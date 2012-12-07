@@ -26,14 +26,19 @@ from .models import get_list, get_mask, get_annotations, client_from_file, clien
 from .driver import Interface
 interface = Interface()
 
+import xbob.db.verification.utils
+
 import os
 
-class Database(object):
+class Database(xbob.db.verification.utils.Database):
   """The Database class reads the original XML lists and provides access
   using the common xbob.db API.
   """
 
   def __init__(self, base_dir = interface.frgc_database_directory()):
+    # call base class constructor
+    xbob.db.verification.utils.Database.__init__(self)
+
     self.m_base_dir = base_dir
     # check that the database directory exists
     if not os.path.exists(self.m_base_dir):
@@ -43,28 +48,6 @@ class Database(object):
     self.m_purposes = ('enrol', 'probe')
     self.m_protocols = ('2.0.1', '2.0.2', '2.0.4') # other protocols might be supported later.
     self.m_mask_types = ('maskI', 'maskII', 'maskIII') # usually, only maskIII (the most difficult one) is used.
-
-  def __check_validity__(self, elements, description, possibilities, default=None):
-    """Checks validity of user input data against a set of valid values"""
-    if not elements:
-      return default if default else possibilities
-    if not isinstance(elements, list) and not isinstance(elements, tuple):
-      return self.__check_validity__((elements,), description, possibilities, default)
-    for k in elements:
-      if k not in possibilities:
-        raise RuntimeError, 'Invalid %s "%s". Valid values are %s, or lists/tuples of those' % (description, k, possibilities)
-    return elements
-
-  def __check_single__(self, element, description, possibilities):
-    """Checks that the given element is part of the possibilities."""
-    if not element:
-      raise RuntimeError, 'Please select one element from %s for %s' % (possibilities, description)
-    if isinstance(element,tuple) or isinstance (element,list):
-      if len(element) > 1:
-        raise RuntimeError, 'For %s, only single elements from %s are allowed' % (description, possibilities)
-      element = element[0]
-    if element not in possibilities:
-      raise RuntimeError, 'The given %s "%s" is not allowed. Please choose one of %s' % (description, element, possibilities)
 
 
   def client_ids(self, groups=None, protocol=None, purposes=None, mask_type='maskIII'):
@@ -89,7 +72,7 @@ class Database(object):
 
     Returns: A list containing all the client id's which have the given properties.
     """
-    groups = self.__check_validity__(groups, "group", self.m_groups)
+    groups = self.check_parameters_for_validity(groups, "group", self.m_groups)
 
     retval = set()
 
@@ -99,9 +82,9 @@ class Database(object):
 
     if 'dev' in groups:
       # validity checks
-      purposes = self.__check_validity__(purposes, "purpose", self.m_purposes)
-      self.__check_single__(protocol, "protocol", self.m_protocols)
-      self.__check_single__(mask_type, "mask type", self.m_mask_types)
+      purposes = self.check_parameters_for_validity(purposes, "purpose", self.m_purposes)
+      protocol = self.check_parameter_for_validity(protocol, "protocol", self.m_protocols)
+      mask_type = self.check_parameter_for_validity(mask_type, "mask type", self.m_mask_types)
 
       # take only those models/probes that are really required by the current mask
       mask = get_mask(self.m_base_dir, protocol, mask_type)
@@ -147,7 +130,7 @@ class Database(object):
 
     Returns: A list containing all the model id's belonging to the given group.
     """
-    groups = self.__check_validity__(groups, "group", self.m_groups)
+    groups = self.check_parameters_for_validity(groups, "group", self.m_groups)
     # for models, purpose is always 'enrol'
     purpose = 'enrol'
 
@@ -157,8 +140,8 @@ class Database(object):
         retval.add(file.m_model)
 
     if 'dev' in groups:
-      self.__check_single__(protocol, "protocol", self.m_protocols)
-      self.__check_single__(mask_type, "mask type", self.m_mask_types)
+      protocol = self.check_parameter_for_validity(protocol, "protocol", self.m_protocols)
+      mask_type = self.check_parameter_for_validity(mask_type, "mask type", self.m_mask_types)
       files = get_list(self.m_base_dir, 'dev', protocol, purpose)
       # take only those models that are really required by the current mask
       mask = get_mask(self.m_base_dir, protocol, mask_type)
@@ -238,7 +221,7 @@ class Database(object):
       file_list.extend([File(frgc_file.m_signature, presentation, frgc_file.m_files[presentation]) for presentation in frgc_file.m_files])
 
     # check that every parameter is as expected
-    groups = self.__check_validity__(groups, "group", self.m_groups)
+    groups = self.check_parameters_for_validity(groups, "group", self.m_groups)
 
     if isinstance(model_ids, int):
       model_ids = (model_ids,)
@@ -254,9 +237,9 @@ class Database(object):
 
     if 'dev' in groups:
       # check protocol, mask, and purposes only in group dev
-      self.__check_single__(protocol, "protocol", self.m_protocols)
-      self.__check_single__(mask_type, "mask type", self.m_mask_types)
-      purposes = self.__check_validity__(purposes, "purpose", self.m_purposes)
+      protocol = self.check_parameter_for_validity(protocol, "protocol", self.m_protocols)
+      mask_type = self.check_parameter_for_validity(mask_type, "mask type", self.m_mask_types)
+      purposes = self.check_parameters_for_validity(purposes, "purpose", self.m_purposes)
 
       # extract dev files
       if 'enrol' in purposes:

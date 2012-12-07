@@ -24,69 +24,18 @@ import xml.sax
 import os
 import numpy
 
+import xbob.db.verification.utils
 
-class File:
+class File (xbob.db.verification.utils.File):
   """This class is just the File object that is returned by the objects function.
   It will be created on need and is not stored anywhere."""
   def __init__(self, signature, presentation, path):
-    # The required information: The file id, the client id and the path
-    self.id = presentation
-    self.client_id = signature
-    self.path = path
-
-  def __repr__(self):
-    return "File('%s')" % self.path
-
-  def make_path(self, directory=None, extension=None):
-    """Wraps the current path so that a complete path is formed.
-    If directory and extension '.jpg' are specified,
-    extensions are automatically replaced by '.JPG' if necessary.
-
-    Keyword parameters:
-
-    directory
-      An optional directory name that will be prefixed to the returned result.
-
-    extension
-      An optional extension that will be suffixed to the returned filename. The
-      extension normally includes the leading ``.`` character as in ``.jpg`` or
-      ``.hdf5``.
-
-    Returns a string containing the newly generated file path.
-    """
-    if not directory: directory = ''
-    if not extension: extension = ''
-
-    # if extension is '.jpg', we have to check if we need to change it to '.JPG'
-    full_path = os.path.join(directory, self.path + extension)
-    if extension == '.jpg' and not os.path.isfile(full_path):
-      capital_path = os.path.join(directory, self.path + '.JPG')
-      if os.path.exists(capital_path):
-        return capital_path
-    return full_path
-
-  def save(self, data, directory=None, extension='.hdf5'):
-    """Saves the input data at the specified location and using the given
-    extension.
-
-    Keyword parameters:
-
-    data
-      The data blob to be saved (normally a :py:class:`numpy.ndarray`).
-
-    directory
-      If not empty or None, this directory is prefixed to the final file
-      destination
-
-    extension
-      The extension of the filename - this will control the type of output and
-      the codec for saving the input blob.
-    """
-    path = self.make_path(directory, extension)
-    bob.utils.makedirs_safe(os.path.dirname(path))
-    bob.io.save(data, path)
+    # just call the base class constructor
+    xbob.db.verification.utils.File.__init__(self, file_id = presentation, client_id = signature, path = path)
 
 
+################################################################################
+############# Internal IO and represenations of the FRGC files #################
 
 # Global model index. This model index is generated on the fly and should not be stored between sessions.
 global model_index

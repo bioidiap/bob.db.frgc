@@ -42,9 +42,9 @@ def dumplist(args):
   db = Database()
 
   r = db.objects(
-      groups=args.groups,
+      groups=args.group,
       protocol=args.protocol,
-      purposes=args.purposes,
+      purposes=args.purpose,
       mask_type = 'maskII') # here we take mask II since this is the combination of mask I and mask III
 
   for f in r:
@@ -67,9 +67,7 @@ def checkfiles(args):
   db = Database()
 
   r = db.objects(
-      groups=args.groups,
       protocol=args.protocol,
-      purposes=args.purposes,
       mask_type = 'maskII') # here we take mask II since this is the combination of mask I and mask III
 
   # go through all files, check if they are available on the filesystem
@@ -92,6 +90,8 @@ def create_annotation_files(args):
   """Creates the position files for the FRGC database
   (using the positions stored in the xml files),
   so that FRGC position files share the same structure as the image files."""
+
+  print >> sys.stderr, "Warning: this function is deprecated. Please use the Database.annotations() function to get the annotations."
 
   # report
   output = sys.stdout
@@ -159,38 +159,31 @@ class Interface(bob.db.driver.Interface):
     subparsers = self.setup_parser(parser,
        "The FRGC database", docs)
 
-    # get the "dumplist" action from a submodule
+    # the "dumplist" action
     dump_list_parser = subparsers.add_parser('dumplist', help=dumplist.__doc__)
-
     dump_list_parser.add_argument('-D', '--database', default=self.frgc_database_directory(), help="The base directory of the FRGC database.")
     dump_list_parser.add_argument('-d', '--directory', help="if given, this path will be prepended to every entry returned.")
     dump_list_parser.add_argument('-e', '--extension', help="if given, this extension will be appended to every entry returned.")
-    dump_list_parser.add_argument('-g', '--groups', help="if given, this value will limit the output files to those belonging to a particular group.", choices=('world', 'dev'))
-    dump_list_parser.add_argument('-p', '--protocol', default = '2.0.1', help="if given, limits the dump to a particular subset of the data that corresponds to the given protocol.", choices=('2.0.1', '2.0.2', '2.0.4'))
-    dump_list_parser.add_argument('-u', '--purposes', help="if given, this value will limit the output files to those designed for the given purposes.", choices=('enrol', 'probe'))
+    dump_list_parser.add_argument('-g', '--group', help="if given, this value will limit the output files to those belonging to a particular group.", choices=('world', 'dev'))
+    dump_list_parser.add_argument('-p', '--protocol', default = '2.0.1', help="limits the dump to a particular subset of the data that corresponds to the given protocol.", choices=('2.0.1', '2.0.2', '2.0.4'))
+    dump_list_parser.add_argument('-u', '--purpose', help="if given, this value will limit the output files to those designed for the given purposes.", choices=('enrol', 'probe'))
     dump_list_parser.add_argument('--self-test', dest="selftest", action='store_true', help=argparse.SUPPRESS)
-
     dump_list_parser.set_defaults(func=dumplist) #action
 
-    # get the "checkfiles" action from a submodule
+    # the "checkfiles" action
     check_files_parser = subparsers.add_parser('checkfiles', help=checkfiles.__doc__)
-
     check_files_parser.add_argument('-D', '--database', default=self.frgc_database_directory(), help="The base directory of the FRGC database.")
     check_files_parser.add_argument('-d', '--directory', help="if given, this path will be prepended to every entry returned.")
-    check_files_parser.add_argument('-e', '--extension', default='.jpg', help="if given, this extension will be appended to every entry returned (defaults to '%(default)s').")
-    check_files_parser.add_argument('-g', '--groups', help="if given, this value will limit the output files to those belonging to a particular group.", choices=('world', 'dev'))
-    check_files_parser.add_argument('-p', '--protocol', default='2.0.1', help="if given, limits the dump to a particular subset of the data that corresponds to the given protocol (defaults to '%(default)s').", choices=('2.0.1', '2.0.2', '2.0.4'))
-    check_files_parser.add_argument('-u', '--purposes', help="if given, this value will limit the output files to those designed for the given purposes.", choices=('enrol', 'probe'))
+    check_files_parser.add_argument('-e', '--extension', default='.jpg', help="if given, this extension will be appended to every entry returned.")
+    check_files_parser.add_argument('-p', '--protocol', default = '2.0.1', help="limits the check to a particular subset of the data that corresponds to the given protocol.", choices=('2.0.1', '2.0.2', '2.0.4'))
     check_files_parser.add_argument('--self-test', dest="selftest", action='store_true', help=argparse.SUPPRESS)
-
     check_files_parser.set_defaults(func=checkfiles) #action
 
-    # get the "create-eye-files" action from a submodule
+    # the "create-eye-files" action
     create_annotation_files_parser = subparsers.add_parser('create-annotation-files', help=create_annotation_files.__doc__)
-
     create_annotation_files_parser.add_argument('-D', '--database', default=self.frgc_database_directory(), help="The base directory of the FRGC database.")
     create_annotation_files_parser.add_argument('-d', '--directory', required=True, help="The eye position files will be stored in this directory.")
-    create_annotation_files_parser.add_argument('-e', '--extension', default = '.pos', help="if given, this extension will be appended to every entry returned (defaults to '%(default)s').")
+    create_annotation_files_parser.add_argument('-e', '--extension', default = '.pos', help="if given, this extension will be appended to every entry returned.")
     create_annotation_files_parser.add_argument('--self-test', dest="selftest", action='store_true', help=argparse.SUPPRESS)
-
     create_annotation_files_parser.set_defaults(func=create_annotation_files) #action
+

@@ -137,7 +137,9 @@ class FRGCDatabaseTest(unittest.TestCase):
       raise SkipTest("The database directory '%s' is not available."%self.m_db_dir)
 
     from bob.db.script.dbmanage import main
-    self.assertEqual( main(['frgc', 'dumplist', '--self-test']), 0 )
-    self.assertEqual( main(['frgc', 'checkfiles', '-d', '.', '--self-test']), 0 )
-    self.assertEqual( main(['frgc', 'create-annotation-files', '-d', '.', '--self-test']), 0 )
+    self.assertEqual( main('frgc dumplist --self-test'.split()), 0 )
+    self.assertEqual( main('frgc dumplist --group=dev --protocol=2.0.4 --purpose=enrol --self-test'.split()), 0 )
+    self.assertEqual( main('frgc checkfiles --self-test'.split()), 0 )
+    # This function is deprecated, it is not tested any more
+    #self.assertEqual( main('frgc create-annotation-files --directory . --self-test'.split()), 0 )
 

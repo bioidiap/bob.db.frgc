@@ -131,7 +131,19 @@ class FRGCDatabaseTest(unittest.TestCase):
         self.assertEqual(self.m_db.get_client_id_from_file_id(file.id), client_id)
 
 
-  def test04_driver_api(self):
+  def test04_annotations(self):
+    # Tests that the annotations are available for all files
+    # we test only one of the protocols
+    for protocol in random.sample(self.m_db.m_protocols, 1):
+      files = self.m_db.objects(protocol=protocol)
+      for file in random.sample(files, 1000):
+        annotations = self.m_db.annotations(file.id)
+        for t in 'leye', 'reye', 'mouth', 'nose':
+          self.assertTrue(t in annotations)
+          self.assertEqual(len(annotations[t]), 2)
+
+
+  def test05_driver_api(self):
     # Tests the frgc driver API.
     if self.m_skip_tests:
       raise SkipTest("The database directory '%s' is not available."%self.m_db_dir)

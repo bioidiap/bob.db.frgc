@@ -161,8 +161,8 @@ class Database(xbob.db.verification.utils.Database):
       The model_id to consider
 
       .. warning ::
-        The given model_id must have been the result of a previous call (models(), files())
-        to the SAME database object, otherwise it will not be known or might be corrupted.
+        The given model_id must have been the result of a previous call to model_ids()
+        of the **same** database object, otherwise it will not be known or might be corrupted.
 
     Returns: The client_id attached to the given model_id
     """
@@ -176,11 +176,6 @@ class Database(xbob.db.verification.utils.Database):
 
     file_id
       The file_id to consider
-
-      .. warning ::
-        The given client_id must have been the result of a previous call (clients(), files())
-        to the SAME database object, otherwise it will not be known.
-
 
     Returns: The client_id attached to the given file_id
     """

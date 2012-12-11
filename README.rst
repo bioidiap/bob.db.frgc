@@ -9,9 +9,11 @@ Note that currently only the experimental protocols *2.0.1*, *2.0.2*, and *2.0.4
 
 .. note::
 
-  This database interface requires the original image database to be available at your system.
-  In order for the database interface to work properly, you have to set the path in the ``Interface.frgc_database_directory()`` function of the ``xbob/db/frgc/driver.py`` file to your FRGC image database main directory.
-  For use at Idiap, the right directory is pre-set.
+  Since this database interface directly works with the file lists of the database directly, it requires the original image database to be available at your system.
+  In order for the database interface to work properly, you have to specify the correct path on each usage.
+  To avoid that, you can set the path in the ``Interface.frgc_database_directory()`` function of the ``xbob/db/frgc/driver.py`` file to your FRGC image database main directory.
+  (Of course, you have to download the source package from git to do that, see below.)
+  For use at Idiap, the right directory is preset.
 
 You would normally not install this package unless you are maintaining it.
 What you would do instead is to tie it in at the package you need to **use** it.

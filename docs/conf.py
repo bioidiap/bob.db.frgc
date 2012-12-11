@@ -77,7 +77,7 @@ copyright = u'%s, Idiap Research Institute' % time.strftime('%Y')
 # built documents.
 #
 # The short X.Y version.
-from xbob.db.gbu.driver import Interface
+from xbob.db.frgc.driver import Interface
 version = Interface().version()
 # The full version, including alpha/beta/rc tags.
 release = version

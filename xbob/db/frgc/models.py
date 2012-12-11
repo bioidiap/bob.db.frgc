@@ -33,6 +33,34 @@ class File (xbob.db.verification.utils.File):
     # just call the base class constructor
     xbob.db.verification.utils.File.__init__(self, file_id = presentation, client_id = signature, path = path)
 
+  # overwrite default make_path behaviour
+  def make_path(self, directory=None, extension=None):
+    """Wraps the current path so that a complete path is formed.
+    If directory and extension '.jpg' are specified,
+    extensions are automatically replaced by '.JPG' if necessary.
+
+    Keyword parameters:
+
+    directory
+      An optional directory name that will be prefixed to the returned result.
+
+    extension
+      An optional extension that will be suffixed to the returned filename. The
+      extension normally includes the leading ``.`` character as in ``.jpg`` or
+      ``.hdf5``.
+
+    Returns a string containing the newly generated file path.
+    """
+    if not directory: directory = ''
+    if not extension: extension = ''
+
+    # if extension is '.jpg', we have to check if we need to change it to '.JPG'
+    full_path = os.path.join(directory, self.path + extension)
+    if extension == '.jpg' and not os.path.isfile(full_path):
+      capital_path = os.path.join(directory, self.path + '.JPG')
+      if os.path.exists(capital_path):
+        return capital_path
+    return full_path
 
 ################################################################################
 ############# Internal IO and represenations of the FRGC files #################

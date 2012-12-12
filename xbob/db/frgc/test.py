@@ -134,6 +134,9 @@ class FRGCDatabaseTest(unittest.TestCase):
   def test04_annotations(self):
     # Tests that the annotations are available for all files
     # we test only one of the protocols
+    if self.m_skip_tests:
+      raise SkipTest("The database directory '%s' is not available."%self.m_db_dir)
+
     for protocol in random.sample(self.m_db.m_protocols, 1):
       files = self.m_db.objects(protocol=protocol)
       for file in random.sample(files, 1000):

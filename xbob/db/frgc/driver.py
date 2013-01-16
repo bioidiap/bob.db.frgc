@@ -66,9 +66,7 @@ def checkfiles(args):
   from .query import Database
   db = Database()
 
-  r = db.objects(
-      protocol=args.protocol,
-      mask_type = 'maskII') # here we take mask II since this is the combination of mask I and mask III
+  r = db.objects(mask_type = 'maskII') # here we take mask II since this is the combination of mask I and mask III
 
   # go through all files, check if they are available on the filesystem
   good = {}
@@ -175,7 +173,6 @@ class Interface(bob.db.driver.Interface):
     check_files_parser.add_argument('-D', '--database', default=self.frgc_database_directory(), help="The base directory of the FRGC database.")
     check_files_parser.add_argument('-d', '--directory', help="if given, this path will be prepended to every entry returned.")
     check_files_parser.add_argument('-e', '--extension', default='.jpg', help="if given, this extension will be appended to every entry returned.")
-    check_files_parser.add_argument('-p', '--protocol', default = '2.0.1', help="limits the check to a particular subset of the data that corresponds to the given protocol.", choices=('2.0.1', '2.0.2', '2.0.4'))
     check_files_parser.add_argument('--self-test', dest="selftest", action='store_true', help=argparse.SUPPRESS)
     check_files_parser.set_defaults(func=checkfiles) #action
 

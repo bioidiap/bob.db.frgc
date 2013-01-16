@@ -83,6 +83,13 @@ class FRGCDatabaseTest(unittest.TestCase):
     if self.m_skip_tests:
       raise SkipTest("The database directory '%s' is not available."%self.m_db_dir)
 
+    # query all File objects
+    self.assertEqual(len(self.m_db.objects(mask_type = None)), 36818)
+    self.assertEqual(len(self.m_db.objects(mask_type = 'maskI')), 36110)
+    self.assertEqual(len(self.m_db.objects(mask_type = 'maskII')), 36500)
+    self.assertEqual(len(self.m_db.objects(mask_type = 'maskIII')), 33032)
+
+
     # The number of objects should always be identical to the number of models...
     protocols = self.m_db.m_protocols
     masks = self.m_db.m_mask_types

@@ -265,6 +265,8 @@ known_masks = {'2.0.1':{'maskI':None, 'maskII':None, 'maskIII':None},
 
 def get_mask(base_dir, protocol, mask_type):
   """Returns the mask ([query_index], [target_index]) for the given protocol and mask type."""
+  if mask_type is None:
+    return None
   if known_masks[protocol][mask_type] == None:
     mask_file = os.path.join(base_dir, mask_dir%(protocol[-1:],), mask_type + ".mtx")
     if not os.path.exists(mask_file):

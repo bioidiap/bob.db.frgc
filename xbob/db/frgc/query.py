@@ -77,14 +77,15 @@ class Database(xbob.db.verification.utils.Database):
     retval = set()
 
     if 'world' in groups:
-      for file in get_list(self.m_base_dir, 'world', protocol):
+      for file in get_list(self.m_base_dir, 'world'):
         retval.add(file.m_signature)
 
     if 'dev' in groups:
       # validity checks
       purposes = self.check_parameters_for_validity(purposes, "purpose", self.m_purposes)
       protocol = self.check_parameter_for_validity(protocol, "protocol", self.m_protocols)
-      mask_type = self.check_parameter_for_validity(mask_type, "mask type", self.m_mask_types)
+      if mask_type is not None:
+        mask_type = self.check_parameter_for_validity(mask_type, "mask type", self.m_mask_types)
 
       # take only those models/probes that are really required by the current mask
       mask = get_mask(self.m_base_dir, protocol, mask_type)
@@ -93,14 +94,14 @@ class Database(xbob.db.verification.utils.Database):
         files = get_list(self.m_base_dir, 'dev', protocol, purpose='enrol')
         for index in range(len(files)):
           # check if this model is used by the mask
-          if (mask[:,index] > 0).any():
+          if mask is None or (mask[:,index] > 0).any():
             retval.add(files[index].m_signature)
 
       if 'probe' in purposes:
         files = get_list(self.m_base_dir, 'dev', protocol, purpose='probe')
         for index in range(len(files)):
           # check if this probe is used by the mask
-          if (mask[index,:] > 0).any():
+          if mask is None or (mask[index,:] > 0).any():
             retval.add(files[index].m_signature)
 
     return sorted(list(retval))
@@ -141,12 +142,13 @@ class Database(xbob.db.verification.utils.Database):
 
     if 'dev' in groups:
       protocol = self.check_parameter_for_validity(protocol, "protocol", self.m_protocols)
-      mask_type = self.check_parameter_for_validity(mask_type, "mask type", self.m_mask_types)
+      if mask_type is not None:
+        mask_type = self.check_parameter_for_validity(mask_type, "mask type", self.m_mask_types)
       files = get_list(self.m_base_dir, 'dev', protocol, purpose)
       # take only those models that are really required by the current mask
       mask = get_mask(self.m_base_dir, protocol, mask_type)
       for index in range(len(files)):
-        if (mask[:,index] > 0).any():
+        if mask is None or (mask[:,index] > 0).any():
           retval.add(files[index].m_model)
 
     return sorted(list(retval))
@@ -192,8 +194,9 @@ class Database(xbob.db.verification.utils.Database):
       'world' files are "Training", whereas 'dev' files are "Target" and/or "Query".
 
     protocol
-      One of the FRGC protocols ('2.0.1', '2.0.2', '2.0.4').
-      Needs to be specified, when 'dev' is amongst the groups.
+      One or more of the FRGC protocols ('2.0.1', '2.0.2', '2.0.4').
+      Only used, if 'dev' is amongst the groups.
+      If not specified, all FRGC protocols will be taken into account.
 
     purposes
       One or several groups for which files should be retrieved ('enrol', 'probe').
@@ -211,63 +214,67 @@ class Database(xbob.db.verification.utils.Database):
     mask_type
       One of the mask types ('maskI', 'maskII', 'maskIII').
     """
-    def extend_file_list(file_list, frgc_file):
+    def extend_files(files, frgc_file):
       """Extends the given file list with File's created from the given FRGCFile."""
-      file_list.extend([File(frgc_file.m_signature, presentation, frgc_file.m_files[presentation]) for presentation in frgc_file.m_files])
+      for presentation in frgc_file.m_files:
+        files[presentation] = File(frgc_file.m_signature, presentation, frgc_file.m_files[presentation])
 
     # check that every parameter is as expected
     groups = self.check_parameters_for_validity(groups, "group", self.m_groups)
+    # we allow to specify more protocols here, just
+    protocols = self.check_parameters_for_validity(protocol, "protocol", self.m_protocols)
 
     if isinstance(model_ids, int):
       model_ids = (model_ids,)
 
-    retval = []
+    files = {}
 
     if 'world' in groups:
       # extract training files
       for file in get_list(self.m_base_dir, 'world'):
         if not model_ids or file.m_signature in model_ids:
           for id, path in file.m_files.items():
-            extend_file_list(retval, file)
+            extend_files(files, file)
 
     if 'dev' in groups:
       # check protocol, mask, and purposes only in group dev
-      protocol = self.check_parameter_for_validity(protocol, "protocol", self.m_protocols)
-      mask_type = self.check_parameter_for_validity(mask_type, "mask type", self.m_mask_types)
+      if mask_type is not None:
+        mask_type = self.check_parameter_for_validity(mask_type, "mask type", self.m_mask_types)
       purposes = self.check_parameters_for_validity(purposes, "purpose", self.m_purposes)
 
-      # extract dev files
-      if 'enrol' in purposes:
-        model_files = get_list(self.m_base_dir, 'dev', protocol, 'enrol')
-        # return only those files that are required by the given protocol
-        mask = get_mask(self.m_base_dir, protocol, mask_type)
-        for model_index in range(len(model_files)):
-          model = model_files[model_index]
-          if not model_ids or model.m_model in model_ids:
-            # test if the model is used by this mask
-            if (mask[:,model_index] > 0).any():
-              extend_file_list(retval, model)
+      for p in protocols:
+        # extract dev files
+        if 'enrol' in purposes:
+          model_files = get_list(self.m_base_dir, 'dev', p, 'enrol')
+          # return only those files that are required by the given protocol
+          mask = get_mask(self.m_base_dir, p, mask_type)
+          for model_index in range(len(model_files)):
+            model = model_files[model_index]
+            if not model_ids or model.m_model in model_ids:
+              # test if the model is used by this mask
+              if mask is None or (mask[:,model_index] > 0).any():
+                extend_files(files, model)
 
-      if 'probe' in purposes:
-        probe_files = get_list(self.m_base_dir, 'dev', protocol, 'probe')
-        # assure that every probe file is returned only once
-        probe_indices = range(len(probe_files))
+        if 'probe' in purposes:
+          probe_files = get_list(self.m_base_dir, 'dev', p, 'probe')
+          # assure that every probe file is returned only once
+          probe_indices = range(len(probe_files))
 
-        # select only that files that belong to the models of with the given ids,
-        # or to any model if no model id is specified
-        model_files = get_list(self.m_base_dir, 'dev', protocol, 'enrol')
-        mask = get_mask(self.m_base_dir, protocol, mask_type)
+          # select only that files that belong to the models of with the given ids,
+          # or to any model if no model id is specified
+          model_files = get_list(self.m_base_dir, 'dev', p, 'enrol')
+          mask = get_mask(self.m_base_dir, p, mask_type)
 
-        for model_index in range(len(model_files)):
-          model = model_files[model_index]
-          if not model_ids or model.m_model in model_ids:
-            probe_indices_for_this_model = probe_indices[:]
-            for probe_index in probe_indices_for_this_model:
-              if mask[probe_index, model_index]:
-                extend_file_list(retval, probe_files[probe_index])
-                probe_indices.remove(probe_index)
+          for model_index in range(len(model_files)):
+            model = model_files[model_index]
+            if not model_ids or model.m_model in model_ids:
+              probe_indices_for_this_model = probe_indices[:]
+              for probe_index in probe_indices_for_this_model:
+                if mask is None or mask[probe_index, model_index]:
+                  extend_files(files, probe_files[probe_index])
+                  probe_indices.remove(probe_index)
 
-    return retval
+    return [files[presentation] for presentation in sorted(files.keys())]
 
 
   def annotations(self, file_id):

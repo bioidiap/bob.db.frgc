@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # vim: set fileencoding=utf-8 :
-# Manuel Guenther <manuel.guenther@idiap.ch>
-# Thu Sep  6 09:01:32 CEST 2012
+# author: Manuel Guenther <manuel.guenther@idiap.ch>
+# date:   Wed Feb 13 12:35:29 CET 2013
 
 from setuptools import setup, find_packages
 
@@ -10,7 +10,7 @@ from setuptools import setup, find_packages
 setup(
 
     name='xbob.db.frgc',
-    version='1.0.2',
+    version='1.0.3',
     description='Database Access API of the Face Recognition Grand Challenge (FRGC) ver2.0 image database for Bob',
     url='http://github.com/bioidiap/xbob.db.frgc',
     license='GPLv3',
@@ -37,12 +37,12 @@ setup(
     entry_points = {
       # bob database declaration
       'bob.db': [
-        'gbu = xbob.db.frgc.driver:Interface',
+        'frgc = xbob.db.frgc.driver:Interface',
         ],
 
       # bob unittest declaration
       'bob.test': [
-        'gbu = xbob.db.frgc.test:FRGCDatabaseTest',
+        'frgc = xbob.db.frgc.test:FRGCDatabaseTest',
         ],
       },
 

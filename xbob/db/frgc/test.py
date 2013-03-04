@@ -121,6 +121,32 @@ class FRGCDatabaseTest(unittest.TestCase):
     for model_id in random.sample(self.m_db.model_ids(groups='dev', protocol='2.0.4', mask_type='maskIII'), 50):
       self.assertEqual(len(self.m_db.objects(groups='dev', protocol='2.0.4', purposes='probe', mask_type='maskIII', model_ids=model_id)), 4228)
 
+  def test02a_object_sets(self):
+    # Test if the object_set function returns reasonable results
+    if self.m_skip_tests:
+      raise SkipTest("The database directory '%s' is not available."%self.m_db_dir)
+
+    # The number of objects should always be identical to the number of models...
+    masks = self.m_db.m_mask_types
+
+    for mask in masks:
+      # the number of models and model files should be identical for protocol 1 and 4
+      # for protocol 2, there are the same number of models as object_sets
+      self.assertEqual(len(self.m_db.object_sets(groups='dev', protocol='2.0.2', purposes='enrol', mask_type=mask)),
+                       len(self.m_db.model_ids(groups='dev', protocol='2.0.2', mask_type=mask)))
+
+    # the number of probes actually differ between the masks, and between the protocols
+    self.assertEqual(len(self.m_db.objects(groups='dev', protocol='2.0.2', purposes='probe', mask_type='maskI')), 14612)
+    self.assertEqual(len(self.m_db.objects(groups='dev', protocol='2.0.2', purposes='probe', mask_type='maskII')), 15392)
+    self.assertEqual(len(self.m_db.objects(groups='dev', protocol='2.0.2', purposes='probe', mask_type='maskIII')), 8456)
+    self.assertEqual(len(self.m_db.object_sets(groups='dev', protocol='2.0.2', purposes='probe', mask_type='maskI')), 3653)
+    self.assertEqual(len(self.m_db.object_sets(groups='dev', protocol='2.0.2', purposes='probe', mask_type='maskII')), 3848)
+    self.assertEqual(len(self.m_db.object_sets(groups='dev', protocol='2.0.2', purposes='probe', mask_type='maskIII')), 2114)
+
+    # as far as I know, the number of probes should be identical for each model...
+    for model_id in random.sample(self.m_db.model_ids(groups='dev', protocol='2.0.2', mask_type='maskIII'), 20):
+      self.assertEqual(len(self.m_db.object_sets(groups='dev', protocol='2.0.2', purposes='probe', mask_type='maskIII', model_ids=model_id)), 2114)
+
 
   def test03_file_ids(self):
     # Tests that the client id's returned by the 'get_client_id_from_file_id()' and 'get_client_id_from_model_id()' functions are correct.

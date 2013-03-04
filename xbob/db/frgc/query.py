@@ -21,7 +21,7 @@
 FRGC database in the most obvious ways.
 """
 
-from .models import get_list, get_mask, get_annotations, client_from_file, client_from_model, File
+from .models import get_list, get_mask, get_annotations, client_from_file, client_from_model, File, FileSet
 
 from .driver import Interface
 interface = Interface()
@@ -277,6 +277,85 @@ class Database(xbob.db.verification.utils.Database):
     return [files[presentation] for presentation in sorted(files.keys())]
 
 
+  def object_sets(self, groups=None, protocol='2.0.2', purposes=None, model_ids=None, mask_type='maskIII'):
+    """Using the specified restrictions, this function returns a list of FileSet objects.
+
+    Keyword Parameters:
+
+    groups
+      Here, only the 'dev' group is valid.
+
+    protocol
+      Here, only the FRGC protocol '2.0.2' is valid.
+      Only used, if 'dev' is amongst the groups.
+
+    purposes
+      One or several groups for which files should be retrieved ('enrol', 'probe').
+      In FRGC terms, 'enrol' is "Target", while 'probe' is "Target" (protocols '2.0.1' and '2.0.2') or "Query" (protocol '2.0.4')
+
+    model_ids
+      If given (as a list of model id's or a single one), only the files
+      belonging to the specified model id is returned.
+
+    mask_type
+      One of the mask types ('maskI', 'maskII', 'maskIII').
+    """
+    def extend_files(files, frgc_file):
+      """Extends the given file list with the FileSet created from the given FRGCFile."""
+      files[frgc_file.m_model] = FileSet(frgc_file)
+
+    # check that every parameter is as expected
+    groups = self.check_parameters_for_validity(groups, "group", ('dev',))
+    # we allow to specify more protocols here, just
+    protocols = self.check_parameters_for_validity(protocol, "protocol", ('2.0.2',))
+
+    if isinstance(model_ids, int):
+      model_ids = (model_ids,)
+
+    files = {}
+
+    if 'dev' in groups:
+      # check protocol, mask, and purposes only in group dev
+      if mask_type is not None:
+        mask_type = self.check_parameter_for_validity(mask_type, "mask type", self.m_mask_types)
+      purposes = self.check_parameters_for_validity(purposes, "purpose", self.m_purposes)
+
+      for p in protocols:
+        # extract dev files
+        if 'enrol' in purposes:
+          model_files = get_list(self.m_base_dir, 'dev', p, 'enrol')
+          # return only those files that are required by the given protocol
+          mask = get_mask(self.m_base_dir, p, mask_type)
+          for model_index in range(len(model_files)):
+            model = model_files[model_index]
+            if not model_ids or model.m_model in model_ids:
+              # test if the model is used by this mask
+              if mask is None or (mask[:,model_index] > 0).any():
+                extend_files(files, model)
+
+        if 'probe' in purposes:
+          probe_files = get_list(self.m_base_dir, 'dev', p, 'probe')
+          # assure that every probe file is returned only once
+          probe_indices = range(len(probe_files))
+
+          # select only that files that belong to the models of with the given ids,
+          # or to any model if no model id is specified
+          model_files = get_list(self.m_base_dir, 'dev', p, 'enrol')
+          mask = get_mask(self.m_base_dir, p, mask_type)
+
+          for model_index in range(len(model_files)):
+            model = model_files[model_index]
+            if not model_ids or model.m_model in model_ids:
+              probe_indices_for_this_model = probe_indices[:]
+              for probe_index in probe_indices_for_this_model:
+                if mask is None or mask[probe_index, model_index]:
+                  extend_files(files, probe_files[probe_index])
+                  probe_indices.remove(probe_index)
+
+    return [files[file_set_id] for file_set_id in sorted(files.keys())]
+
+
   def annotations(self, file_id):
     """Returns the annotations for the given file id as a dictionary {'reye':(y,x), 'leye':(y,x), 'mouth':(y,x), 'nose':(y,x)}."""
     return get_annotations(self.m_base_dir, file_id)
+

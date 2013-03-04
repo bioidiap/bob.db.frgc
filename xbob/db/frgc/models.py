@@ -62,6 +62,19 @@ class File (xbob.db.verification.utils.File):
         return capital_path
     return full_path
 
+
+class FileSet:
+  """This class is just the FileSet object that is returned by the object_sets function.
+  It will be created on need and is not stored anywhere."""
+  def __init__(self, frgc_file):
+    # The id is simply taken from the FRGCFile model id; WARNING: this ID is not stable and should not be stored anywhere.
+    self.id = frgc_file.m_model
+    self.client_id = frgc_file.m_signature
+    self.files = [File(frgc_file.m_signature, presentation, frgc_file.m_files[presentation]) for presentation in frgc_file.m_files]
+    # the path is simply a concatenation of the file names of all the files in the set; it is not really used anywhere
+    self.path = self.files[0].path[:3] + self.files[0].path[3:].split('d')[0] + "d" + "+".join([self.files[i].path[3:].split('d')[1] for i in range(len(self.files))])
+
+
 ################################################################################
 ############# Internal IO and represenations of the FRGC files #################
 

@@ -50,6 +50,13 @@ class Database(xbob.db.verification.utils.Database):
     self.m_mask_types = ('maskI', 'maskII', 'maskIII') # usually, only maskIII (the most difficult one) is used.
 
 
+  def provides_file_set_for_protocol(self, protocol):
+    """Returns True for every protocol for which file sets (instead of single files) are used for enrollment and probing.
+    Currently, this is only the '2.0.2', protocol."""
+    protocol = self.check_parameter_for_validity(protocol, 'protocol', self.m_protocols)
+    return protocol == '2.0.2'
+
+
   def client_ids(self, groups=None, protocol=None, purposes=None, mask_type='maskIII'):
     """Returns a list of client ids for the specific query by the user.
 

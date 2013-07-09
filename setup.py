@@ -10,7 +10,7 @@ from setuptools import setup, find_packages
 setup(
 
     name='xbob.db.frgc',
-    version='1.0.4',
+    version='1.1.0',
     description='Database Access API of the Face Recognition Grand Challenge (FRGC) ver2.0 image database for Bob',
     url='http://github.com/bioidiap/xbob.db.frgc',
     license='GPLv3',

@@ -41,6 +41,15 @@ class FRGCDatabaseTest(unittest.TestCase):
       self.m_db_dir = interface.frgc_database_directory()
       self.m_skip_tests = True
 
+  def test00_xx(self):
+    # sometimes a specific test fails, so here it is:
+    for protocol in self.m_db.m_protocols:
+      clients = self.m_db.client_ids(groups='dev', protocol=protocol, purposes='enrol', mask_type='maskIII')
+      if len(clients) != 370:
+        print "For protocol", protocol, "the number of clients should be 370, but is", len(clients)
+        print clients
+        self.assertTrue(False)
+
 
   def test01_client_ids(self):
     # Tests that the 'client_ids()' and 'model_ids()' functions return the desired number of elements.

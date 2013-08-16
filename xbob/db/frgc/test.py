@@ -49,8 +49,8 @@ class FRGCDatabaseTest(unittest.TestCase):
     for protocol in self.m_db.m_protocols:
       clients = self.m_db.client_ids(groups='dev', protocol=protocol, purposes='enrol', mask_type='maskIII')
       if len(clients) != 370:
-        print "For protocol", protocol, "the number of clients should be 370, but is", len(clients)
-        print clients
+        print("For protocol", protocol, "the number of clients should be 370, but is", len(clients))
+        print(clients)
         self.assertTrue(False)
 
 

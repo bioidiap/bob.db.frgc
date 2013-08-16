@@ -240,7 +240,7 @@ class Database(xbob.db.verification.utils.Database):
       # extract training files
       for file in get_list(self.m_base_dir, 'world'):
         if not model_ids or file.m_signature in model_ids:
-          for id, path in file.m_files.items():
+          for id, path in list(file.m_files.items()):
             extend_files(files, file)
 
     if 'dev' in groups:
@@ -265,7 +265,7 @@ class Database(xbob.db.verification.utils.Database):
         if 'probe' in purposes:
           probe_files = get_list(self.m_base_dir, 'dev', p, 'probe')
           # assure that every probe file is returned only once
-          probe_indices = range(len(probe_files))
+          probe_indices = list(range(len(probe_files)))
 
           # select only that files that belong to the models of with the given ids,
           # or to any model if no model id is specified
@@ -343,7 +343,7 @@ class Database(xbob.db.verification.utils.Database):
         if 'probe' in purposes:
           probe_files = get_list(self.m_base_dir, 'dev', p, 'probe')
           # assure that every probe file is returned only once
-          probe_indices = range(len(probe_files))
+          probe_indices = list(range(len(probe_files)))
 
           # select only that files that belong to the models of with the given ids,
           # or to any model if no model id is specified

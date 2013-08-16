@@ -20,6 +20,8 @@
 """Commands the FRGC database can respond to.
 """
 
+from __future__ import print_function
+
 import os
 import sys
 import tempfile, shutil
@@ -89,7 +91,7 @@ def create_annotation_files(args):
   (using the positions stored in the xml files),
   so that FRGC position files share the same structure as the image files."""
 
-  print >> sys.stderr, "Warning: this function is deprecated. Please use the Database.annotations() function to get the annotations."
+  print("Warning: this function is deprecated. Please use the Database.annotations() function to get the annotations.", file=sys.stdout)
 
   # report
   output = sys.stdout

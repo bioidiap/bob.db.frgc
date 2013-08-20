@@ -186,16 +186,16 @@ def read_mask(mask_file):
   f = open(mask_file, 'rb')
   # read until the phrase "MB" is read
   b = None
-  while b != 'B' and b != '':
+  while b not in ('B', '', b'B', b''):
     m = None
-    while m != 'M' and m != '':
+    while m not in ('M', '', b'M', b''):
       m = f.read(1)
     b = f.read(1)
-  if m != 'M' or b != 'B':
+  if m not in ('M', b'M') or b not in ('B', b'B'):
     raise ValueError("The given mask file '" + mask_file + "' is invalid.")
 
   # read the mask size
-  queries, targets = f.readline().split(' ')[1:]
+  queries, targets = f.readline().split(b' ')[1:]
 
   # read mask
   mask = numpy.fromfile(f, dtype = numpy.uint8)
@@ -240,7 +240,7 @@ def get_list(base_dir, group, protocol=None, purpose=None):
       list = handler.m_file_list
       # integrate in dicts
       for g in list:
-        for k,v in g.m_files.iteritems():
+        for k,v in g.m_files.items():
           file_dict[k] = g.m_signature
         model_dict[g.m_model] = g.m_signature
 

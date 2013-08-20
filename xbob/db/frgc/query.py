@@ -29,6 +29,7 @@ interface = Interface()
 import xbob.db.verification.utils
 
 import os
+import six
 
 class Database(xbob.db.verification.utils.Database):
   """The Database class reads the original XML lists and provides access
@@ -231,7 +232,7 @@ class Database(xbob.db.verification.utils.Database):
     # we allow to specify more protocols here, just
     protocols = self.check_parameters_for_validity(protocol, "protocol", self.m_protocols)
 
-    if isinstance(model_ids, int):
+    if isinstance(model_ids, six.integer_types):
       model_ids = (model_ids,)
 
     files = {}
@@ -316,7 +317,7 @@ class Database(xbob.db.verification.utils.Database):
     # we allow to specify more protocols here, just
     protocols = self.check_parameters_for_validity(protocol, "protocol", ('2.0.2',))
 
-    if isinstance(model_ids, int):
+    if isinstance(model_ids, six.integer_types):
       model_ids = (model_ids,)
 
     files = {}

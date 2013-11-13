@@ -10,7 +10,7 @@ from setuptools import setup, find_packages
 setup(
 
     name='xbob.db.frgc',
-    version='1.1.3a0',
+    version='1.2.1a0',
     description='Database Access API of the Face Recognition Grand Challenge (FRGC) ver2.0 image database for Bob',
     url='http://github.com/bioidiap/xbob.db.frgc',
     license='GPLv3',
@@ -27,7 +27,7 @@ setup(
       'setuptools',
       'six',  # py2/3 compatibility library
       'bob',  # base signal proc./machine learning library
-      'xbob.db.verification.utils' # defines a set of utilities for face verification databases like this one.
+      'xbob.db.verification.utils>=1.0.0' # defines a set of utilities for face verification databases like this one.
     ],
 
     namespace_packages = [

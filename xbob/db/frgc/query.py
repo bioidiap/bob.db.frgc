@@ -36,9 +36,12 @@ class Database(xbob.db.verification.utils.Database):
   using the common xbob.db API.
   """
 
-  def __init__(self, base_dir = interface.frgc_database_directory()):
+  def __init__(self, base_dir = interface.frgc_database_directory(), original_extension = '.jpg'):
+    # NOTE: For some images, the image extension is '.JPG' instead.
+    # this interface will keep track of this automatically and always return the correct image name
+
     # call base class constructor
-    xbob.db.verification.utils.Database.__init__(self)
+    xbob.db.verification.utils.Database.__init__(self, original_directory=base_dir, original_extension=original_extension)
 
     self.m_base_dir = base_dir
     # check that the database directory exists

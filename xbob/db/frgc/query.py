@@ -53,6 +53,17 @@ class Database(xbob.db.verification.utils.Database):
     self.m_protocols = ('2.0.1', '2.0.2', '2.0.4') # other protocols might be supported later.
     self.m_mask_types = ('maskI', 'maskII', 'maskIII') # usually, only maskIII (the most difficult one) is used.
 
+  def groups(self, protocol=None):
+    """Returns a list of groups for the given protocol
+
+    Keyword Parameters:
+
+    protocol
+      One or several of the FRGC protocols ('2.0.1', '2.0.2, '2.0.4'),
+
+    Returns: a list of groups
+    """
+    return self.m_groups
 
   def provides_file_set_for_protocol(self, protocol):
     """Returns True for every protocol for which file sets (instead of single files) are used for enrollment and probing.
@@ -70,7 +81,7 @@ class Database(xbob.db.verification.utils.Database):
       One or several groups to which the models belong ('world', 'dev').
 
     protocol
-      One or several of the GBU protocols ('2.0.1', '2.0.2, '2.0.4'),
+      One or several of the FRGC protocols ('2.0.1', '2.0.2, '2.0.4'),
       required only if one of the groups is 'dev'.
 
     purposes
@@ -134,7 +145,7 @@ class Database(xbob.db.verification.utils.Database):
       One or several groups to which the models belong ('world', 'dev').
 
     protocol
-      One or several of the GBU protocols ('2.0.1', '2.0.2, '2.0.4'),
+      One or several of the FRGC protocols ('2.0.1', '2.0.2, '2.0.4'),
       required only if one of the groups is 'dev'.
 
     mask_type

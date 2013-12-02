@@ -46,6 +46,7 @@ class FRGCDatabaseTest(unittest.TestCase):
     if self.m_skip_tests:
       raise SkipTest("The database directory '%s' is not available."%self.m_db_dir)
 
+    self.assertEqual(len(self.m_db.groups()), 2)
     for protocol in self.m_db.m_protocols:
       clients = self.m_db.client_ids(groups='dev', protocol=protocol, purposes='enrol', mask_type='maskIII')
       if len(clients) != 370:

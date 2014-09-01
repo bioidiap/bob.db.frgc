@@ -40,11 +40,6 @@ setup(
       'bob.db': [
         'frgc = bob.db.frgc.driver:Interface',
       ],
-
-      # bob unittest declaration
-      'bob.test': [
-        'frgc = bob.db.frgc.test',
-      ],
     },
 
     classifiers = [

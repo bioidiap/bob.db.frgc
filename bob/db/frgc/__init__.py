@@ -29,12 +29,6 @@ To avoid that, you can set the path in the ``Interface.frgc_database_directory()
 (Of course, you have to download the source package from git to do that, see below.)
 For use at Idiap, the right directory is preset.
 
-In order to generate the annotation files (so that the database can be used like any other bob.db database), please call ``bin/bob_dbmanage.py frgc create-position-files --directory <YOUR_PATH>`` from the main directory of this package.
-
-.. note ::
-  The usage of this function is deprecated.
-  To access the annotations, please use the ``Database.annotations()`` function instead.
-
 In opposition to the original FRGC protocols, here only those image files and models that are required by the mask are used.
 This saves some time and space, but ensures identical results.
 

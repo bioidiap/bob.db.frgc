@@ -86,51 +86,6 @@ def checkfiles(args):
 
   return 0
 
-def create_annotation_files(args):
-  """Creates the position files for the FRGC database
-  (using the positions stored in the xml files),
-  so that FRGC position files share the same structure as the image files."""
-
-  print("Warning: this function is deprecated. Please use the Database.annotations() function to get the annotations.", file=sys.stdout)
-
-  # report
-  output = sys.stdout
-  if args.selftest:
-    output = bob.db.base.utils.null()
-    if not os.path.exists(args.database):
-      output.write("The base directory of the database does not exist. We omit this self test.")
-      return 0
-
-    args.directory = tempfile.mkdtemp(prefix='bob_db_frgc_')
-
-  from .query import Database
-  db = Database()
-
-  # retrieve all files
-  files = db.objects(protocol='2.0.4')
-  for file in files:
-    filename = file.make_path(args.directory, args.extension)
-    if not os.path.exists(os.path.dirname(filename)):
-      os.makedirs(os.path.dirname(filename))
-    annotations = db.annotations(file.id)
-    f = open(filename, 'w')
-    # write eyes in the common order: left eye, right eye
-
-    for type in ('reye', 'leye', 'nose', 'mouth'):
-      f.writelines(type + ' ' + str(annotations[type][1]) + ' ' + str(annotations[type][0]) + '\n')
-    f.close()
-
-
-  if args.selftest:
-    # check that all files really exist
-    args.selftest = False
-    args.groups = None
-    args.purposes = None
-    for args.protocol in ('2.0.1','2.0.2','2.0.4'):
-      checkfiles(args)
-    shutil.rmtree(args.directory)
-
-  return 0
 
 
 class Interface(bob.db.base.driver.Interface):
@@ -177,12 +132,4 @@ class Interface(bob.db.base.driver.Interface):
     check_files_parser.add_argument('-e', '--extension', default='.jpg', help="if given, this extension will be appended to every entry returned.")
     check_files_parser.add_argument('--self-test', dest="selftest", action='store_true', help=argparse.SUPPRESS)
     check_files_parser.set_defaults(func=checkfiles) #action
-
-    # the "create-eye-files" action
-    create_annotation_files_parser = subparsers.add_parser('create-annotation-files', help=create_annotation_files.__doc__)
-    create_annotation_files_parser.add_argument('-D', '--database', default=self.frgc_database_directory(), help="The base directory of the FRGC database.")
-    create_annotation_files_parser.add_argument('-d', '--directory', required=True, help="The eye position files will be stored in this directory.")
-    create_annotation_files_parser.add_argument('-e', '--extension', default = '.pos', help="if given, this extension will be appended to every entry returned.")
-    create_annotation_files_parser.add_argument('--self-test', dest="selftest", action='store_true', help=argparse.SUPPRESS)
-    create_annotation_files_parser.set_defaults(func=create_annotation_files) #action
 

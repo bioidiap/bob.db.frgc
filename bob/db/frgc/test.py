@@ -180,6 +180,4 @@ def test_driver_api():
   assert  main('frgc dumplist --self-test'.split()) == 0
   assert  main('frgc dumplist --group=dev --protocol=2.0.4 --purpose=enrol --self-test'.split()) == 0
   assert  main('frgc checkfiles --self-test'.split()) == 0
-  # This function is deprecated, it is not tested any more
-  #assert  main('frgc create-annotation-files --directory . --self-test'.split()) == 0
 

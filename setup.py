@@ -9,10 +9,10 @@ from setuptools import setup, find_packages
 # parameters that define our package.
 setup(
 
-    name='xbob.db.frgc',
-    version='1.2.1a0',
+    name='bob.db.frgc',
+    version='2.0.0a0',
     description='Database Access API of the Face Recognition Grand Challenge (FRGC) ver2.0 image database for Bob',
-    url='http://github.com/bioidiap/xbob.db.frgc',
+    url='http://github.com/bioidiap/bob.db.frgc',
     license='GPLv3',
     author='Manuel Guenther',
     author_email='manuel.guenther@idiap.ch',
@@ -26,26 +26,26 @@ setup(
     install_requires=[
       'setuptools',
       'six',  # py2/3 compatibility library
-      'bob',  # base signal proc./machine learning library
-      'xbob.db.verification.utils>=1.0.0' # defines a set of utilities for face verification databases like this one.
+      'bob.db.base',
+      'bob.db.verification.utils' # defines a set of utilities for face verification databases like this one.
     ],
 
     namespace_packages = [
-      'xbob',
-      'xbob.db',
-      ],
+      'bob',
+      'bob.db',
+    ],
 
     entry_points = {
       # bob database declaration
       'bob.db': [
-        'frgc = xbob.db.frgc.driver:Interface',
-        ],
+        'frgc = bob.db.frgc.driver:Interface',
+      ],
 
       # bob unittest declaration
       'bob.test': [
-        'frgc = xbob.db.frgc.test:FRGCDatabaseTest',
-        ],
-      },
+        'frgc = bob.db.frgc.test',
+      ],
+    },
 
     classifiers = [
       'Development Status :: 4 - Beta',
@@ -56,5 +56,5 @@ setup(
       'Programming Language :: Python :: 3',
       'Topic :: Scientific/Engineering :: Artificial Intelligence',
       'Topic :: Database :: Front-Ends',
-      ],
+    ],
 )

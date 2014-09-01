@@ -25,11 +25,11 @@ Already running the tests will need up to 2 GB of free memory.
 
 In opposition to other databases, there is no .sql3-file for this database, but instead the XML lists provided in the database are used directly.
 In order for the database interface to work properly, you have to specify the correct path on each usage.
-To avoid that, you can set the path in the ``Interface.frgc_database_directory()`` function of the ``xbob/db/frgc/driver.py`` file to your FRGC image database main directory.
+To avoid that, you can set the path in the ``Interface.frgc_database_directory()`` function of the ``bob/db/frgc/driver.py`` file to your FRGC image database main directory.
 (Of course, you have to download the source package from git to do that, see below.)
 For use at Idiap, the right directory is preset.
 
-In order to generate the annotation files (so that the database can be used like any other xbob.db database), please call ``bin/bob_dbmanage.py frgc create-position-files --directory <YOUR_PATH>`` from the main directory of this package.
+In order to generate the annotation files (so that the database can be used like any other bob.db database), please call ``bin/bob_dbmanage.py frgc create-position-files --directory <YOUR_PATH>`` from the main directory of this package.
 
 .. note ::
   The usage of this function is deprecated.
@@ -50,4 +50,21 @@ Enjoy!
 
 from .query import Database
 
-__all__ = ['Database']
+def get_config():
+  """Returns a string containing the configuration information.
+  """
+
+  import pkg_resources
+
+  packages = pkg_resources.require(__name__)
+  this = packages[0]
+  deps = packages[1:]
+
+  retval =  "%s: %s (%s)\n" % (this.key, this.version, this.location)
+  retval += "  - python dependencies:\n"
+  for d in deps: retval += "    - %s: %s (%s)\n" % (d.key, d.version, d.location)
+
+  return retval.strip()
+
+# gets sphinx autodoc done right - don't remove it
+__all__ = [_ for _ in dir() if not _.startswith('_')]

@@ -11,7 +11,7 @@ Note that currently only the experimental protocols *2.0.1*, *2.0.2*, and *2.0.4
 
   Since this database interface directly works with the file lists of the database directly, it requires the original image database to be available at your system.
   In order for the database interface to work properly, you have to specify the correct path on each usage.
-  To avoid that, you can set the path in the ``Interface.frgc_database_directory()`` function of the ``xbob/db/frgc/driver.py`` file to your FRGC image database main directory.
+  To avoid that, you can set the path in the ``Interface.frgc_database_directory()`` function of the ``bob/db/frgc/driver.py`` file to your FRGC image database main directory.
   (Of course, you have to download the source package from git to do that, see below.)
   For use at Idiap, the right directory is preset.
 
@@ -26,7 +26,7 @@ There are a few ways to achieve this:
 The package is available in two different distribution formats:
 
 a) You can download it from `PyPI <http://pypi.python.org/pypi>`_, or
-b) You can download it in its source form from `its git repository <https://github.com/bioidiap/xbob.db.frgc>`_.
+b) You can download it in its source form from `its git repository <https://github.com/bioidiap/bob.db.frgc>`_.
 
 You can mix and match points 1/2 and a/b above based on your requirements.
 Here are some examples:
@@ -39,11 +39,11 @@ Edit your ``setup.py`` in your satellite package and add the following entry in 
 
     install_requires=[
       ...
-      "xbob.db.frgc",
+      "bob.db.frgc",
     ],
 
 Proceed normally with your ``boostrap/buildout`` steps and you should be all set.
-That means you can now import the ``xbob.db.frgc`` namespace into your scripts.
+That means you can now import the ``bob.db.frgc`` namespace into your scripts.
 
 Modify your buildout.cfg and download from git
 ==============================================
@@ -57,8 +57,8 @@ Your ``buildout.cfg`` file should contain the following lines::
   auto-checkout = *
   eggs = bob
          ...
-         xbob.db.frgc
+         bob.db.frgc
 
   [sources]
-  xbob.db.frgc = git https://github.com/bioidiap/xbob.db.frgc.git
+  bob.db.frgc = git https://github.com/bioidiap/bob.db.frgc.git
   ...

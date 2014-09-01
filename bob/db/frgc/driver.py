@@ -27,14 +27,14 @@ import sys
 import tempfile, shutil
 import argparse
 
-import bob.db
+import bob.db.base
 
 def dumplist(args):
   """Dumps lists of files based on your criteria"""
 
   output = sys.stdout
   if args.selftest:
-    output = bob.db.utils.null()
+    output = bob.db.base.utils.null()
 
   if args.selftest and not os.path.exists(args.database):
     output.write("The base directory of the database does not exist. We omit this self test.")
@@ -59,7 +59,7 @@ def checkfiles(args):
 
   output = sys.stdout
   if args.selftest:
-    output = bob.db.utils.null()
+    output = bob.db.base.utils.null()
 
   if args.selftest and not os.path.exists(args.database):
     output.write("The base directory of the database does not exist. We omit this self test.")
@@ -96,7 +96,7 @@ def create_annotation_files(args):
   # report
   output = sys.stdout
   if args.selftest:
-    output = bob.db.utils.null()
+    output = bob.db.base.utils.null()
     if not os.path.exists(args.database):
       output.write("The base directory of the database does not exist. We omit this self test.")
       return 0
@@ -133,14 +133,14 @@ def create_annotation_files(args):
   return 0
 
 
-class Interface(bob.db.driver.Interface):
+class Interface(bob.db.base.driver.Interface):
 
   def name(self):
     return 'frgc'
 
   def version(self):
     import pkg_resources  # part of setuptools
-    return pkg_resources.require('xbob.db.%s' % self.name())[0].version
+    return pkg_resources.require('bob.db.%s' % self.name())[0].version
 
   def files(self):
     from pkg_resources import resource_filename

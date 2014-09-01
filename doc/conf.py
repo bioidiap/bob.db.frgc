@@ -40,7 +40,6 @@ extensions = [
   'sphinx.ext.autosummary',
   'sphinx.ext.doctest',
   'sphinx.ext.intersphinx',
-  'bob.sphinxext.plot', # ours add source copying to install directory
   ]
 
 # The viewcode extension appeared only on Sphinx >= 1.0.0
@@ -77,7 +76,7 @@ copyright = u'%s, Idiap Research Institute' % time.strftime('%Y')
 # built documents.
 #
 # The short X.Y version.
-from xbob.db.frgc.driver import Interface
+from bob.db.frgc.driver import Interface
 version = Interface().version()
 # The full version, including alpha/beta/rc tags.
 release = version
@@ -151,7 +150,7 @@ html_favicon = ''
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+#html_static_path = ['_static']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.

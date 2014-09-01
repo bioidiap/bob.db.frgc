@@ -26,14 +26,14 @@ from .models import get_list, get_mask, get_annotations, client_from_file, clien
 from .driver import Interface
 interface = Interface()
 
-import xbob.db.verification.utils
+import bob.db.verification.utils
 
 import os
 import six
 
-class Database(xbob.db.verification.utils.Database):
+class Database(bob.db.verification.utils.Database):
   """The Database class reads the original XML lists and provides access
-  using the common xbob.db API.
+  using the common bob.db API.
   """
 
   def __init__(self, base_dir = interface.frgc_database_directory(), original_extension = '.jpg'):
@@ -41,12 +41,12 @@ class Database(xbob.db.verification.utils.Database):
     # this interface will keep track of this automatically and always return the correct image name
 
     # call base class constructor
-    xbob.db.verification.utils.Database.__init__(self, original_directory=base_dir, original_extension=original_extension)
+    bob.db.verification.utils.Database.__init__(self, original_directory=base_dir, original_extension=original_extension)
 
     self.m_base_dir = base_dir
     # check that the database directory exists
     if not os.path.exists(self.m_base_dir):
-      raise ValueError("The database directory '%s' does not exist. Please choose the correct path, or correct the path in the Interface.frgc_database_directory() function of the xbob/db/frgc/driver.py file."%base_dir)
+      raise ValueError("The database directory '%s' does not exist. Please choose the correct path, or correct the path in the Interface.frgc_database_directory() function of the bob/db/frgc/driver.py file."%base_dir)
 
     self.m_groups  = ('world', 'dev')
     self.m_purposes = ('enrol', 'probe')
@@ -176,7 +176,7 @@ class Database(xbob.db.verification.utils.Database):
     return sorted(list(retval))
 
 
-  def get_client_id_from_model_id(self, model_id):
+  def get_client_id_from_model_id(self, model_id, **kwargs):
     """Returns the client_id attached to the given model_id.
 
     Keyword Parameters:
@@ -193,7 +193,7 @@ class Database(xbob.db.verification.utils.Database):
     return client_from_model(model_id)
 
 
-  def get_client_id_from_file_id(self, file_id):
+  def get_client_id_from_file_id(self, file_id, **kwargs):
     """Returns the client_id (real client id) attached to the given file_id
 
     Keyword Parameters:

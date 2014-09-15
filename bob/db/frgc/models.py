@@ -150,7 +150,7 @@ class AnnotationFileReader (xml.sax.handler.ContentHandler):
 
   def startElement(self, name, attrs):
     if name == 'Recording':
-      assert self.m_signature == None
+      assert self.m_signature is None
       self.m_signature = attrs['recording_id']
       self.m_annotations = {}
       self.m_use_recording = False
@@ -284,7 +284,7 @@ def get_mask(base_dir, protocol, mask_type):
   """Returns the mask ([query_index], [target_index]) for the given protocol and mask type."""
   if mask_type is None:
     return None
-  if known_masks[protocol][mask_type] == None:
+  if known_masks[protocol][mask_type] is None:
     mask_file = os.path.join(base_dir, mask_dir%(protocol[-1:],), mask_type + ".mtx")
     if not os.path.exists(mask_file):
       raise xml.sax.SAXException("Could not find the mask file '%s'. Your FRGC base directory '%s' seems to be wrong or incomplete."%(mask_file, base_dir))

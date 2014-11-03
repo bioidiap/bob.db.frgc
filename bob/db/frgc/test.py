@@ -167,7 +167,7 @@ def test_annotations():
   for protocol in random.sample(db.m_protocols, 1):
     files = db.objects(protocol=protocol)
     for file in random.sample(files, 1000):
-      annotations = db.annotations(file.id)
+      annotations = db.annotations(file)
       for t in 'leye', 'reye', 'mouth', 'nose':
         assert t in annotations
         assert len(annotations[t]) == 2

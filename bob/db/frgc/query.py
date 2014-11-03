@@ -377,7 +377,7 @@ class Database(bob.db.verification.utils.Database):
     return [files[file_set_id] for file_set_id in sorted(files.keys())]
 
 
-  def annotations(self, file_id):
-    """Returns the annotations for the given file id as a dictionary {'reye':(y,x), 'leye':(y,x), 'mouth':(y,x), 'nose':(y,x)}."""
-    return get_annotations(self.m_base_dir, file_id)
+  def annotations(self, file):
+    """Returns the annotations for the given file as a dictionary {'reye':(y,x), 'leye':(y,x), 'mouth':(y,x), 'nose':(y,x)}."""
+    return get_annotations(self.m_base_dir, file.id)
 

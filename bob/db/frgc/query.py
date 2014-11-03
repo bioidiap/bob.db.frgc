@@ -49,7 +49,7 @@ class Database(bob.db.verification.utils.Database):
       raise ValueError("The database directory '%s' does not exist. Please choose the correct path, or correct the path in the Interface.frgc_database_directory() function of the bob/db/frgc/driver.py file."%base_dir)
 
     self.m_groups  = ('world', 'dev')
-    self.m_purposes = ('enrol', 'probe')
+    self.m_purposes = ('enroll', 'probe')
     self.m_protocols = ('2.0.1', '2.0.2', '2.0.4') # other protocols might be supported later.
     self.m_mask_types = ('maskI', 'maskII', 'maskIII') # usually, only maskIII (the most difficult one) is used.
 
@@ -85,7 +85,7 @@ class Database(bob.db.verification.utils.Database):
       required only if one of the groups is 'dev'.
 
     purposes
-      One or several groups for which files should be retrieved ('enrol', 'probe').
+      One or several groups for which files should be retrieved ('enroll', 'probe').
       Only used when the group is 'dev'·
       For some protocol/mask_type pairs, not all clients are used for enrollment / for probe.
 
@@ -112,8 +112,8 @@ class Database(bob.db.verification.utils.Database):
       # take only those models/probes that are really required by the current mask
       mask = get_mask(self.m_base_dir, protocol, mask_type)
 
-      if 'enrol' in purposes:
-        files = get_list(self.m_base_dir, 'dev', protocol, purpose='enrol')
+      if 'enroll' in purposes:
+        files = get_list(self.m_base_dir, 'dev', protocol, purpose='enroll')
         for index in range(len(files)):
           # check if this model is used by the mask
           if mask is None or (mask[:,index] > 0).any():
@@ -154,8 +154,8 @@ class Database(bob.db.verification.utils.Database):
     Returns: A list containing all the model id's belonging to the given group.
     """
     groups = self.check_parameters_for_validity(groups, "group", self.m_groups)
-    # for models, purpose is always 'enrol'
-    purpose = 'enrol'
+    # for models, purpose is always 'enroll'
+    purpose = 'enroll'
 
     retval = set()
     if 'world' in groups:
@@ -221,9 +221,9 @@ class Database(bob.db.verification.utils.Database):
       If not specified, all FRGC protocols will be taken into account.
 
     purposes
-      One or several groups for which files should be retrieved ('enrol', 'probe').
+      One or several groups for which files should be retrieved ('enroll', 'probe').
       Only used when the group is 'dev'·
-      In FRGC terms, 'enrol' is "Target", while 'probe' is "Target" (protocols '2.0.1' and '2.0.2') or "Query" (protocol '2.0.4')
+      In FRGC terms, 'enroll' is "Target", while 'probe' is "Target" (protocols '2.0.1' and '2.0.2') or "Query" (protocol '2.0.4')
 
     model_ids
       If given (as a list of model id's or a single one), only the files
@@ -266,8 +266,8 @@ class Database(bob.db.verification.utils.Database):
 
       for p in protocols:
         # extract dev files
-        if 'enrol' in purposes:
-          model_files = get_list(self.m_base_dir, 'dev', p, 'enrol')
+        if 'enroll' in purposes:
+          model_files = get_list(self.m_base_dir, 'dev', p, 'enroll')
           # return only those files that are required by the given protocol
           mask = get_mask(self.m_base_dir, p, mask_type)
           for model_index in range(len(model_files)):
@@ -284,7 +284,7 @@ class Database(bob.db.verification.utils.Database):
 
           # select only that files that belong to the models of with the given ids,
           # or to any model if no model id is specified
-          model_files = get_list(self.m_base_dir, 'dev', p, 'enrol')
+          model_files = get_list(self.m_base_dir, 'dev', p, 'enroll')
           mask = get_mask(self.m_base_dir, p, mask_type)
 
           for model_index in range(len(model_files)):
@@ -312,8 +312,8 @@ class Database(bob.db.verification.utils.Database):
       Only used, if 'dev' is amongst the groups.
 
     purposes
-      One or several groups for which files should be retrieved ('enrol', 'probe').
-      In FRGC terms, 'enrol' is "Target", while 'probe' is "Target" (protocols '2.0.1' and '2.0.2') or "Query" (protocol '2.0.4')
+      One or several groups for which files should be retrieved ('enroll', 'probe').
+      In FRGC terms, 'enroll' is "Target", while 'probe' is "Target" (protocols '2.0.1' and '2.0.2') or "Query" (protocol '2.0.4')
 
     model_ids
       If given (as a list of model id's or a single one), only the files
@@ -344,8 +344,8 @@ class Database(bob.db.verification.utils.Database):
 
       for p in protocols:
         # extract dev files
-        if 'enrol' in purposes:
-          model_files = get_list(self.m_base_dir, 'dev', p, 'enrol')
+        if 'enroll' in purposes:
+          model_files = get_list(self.m_base_dir, 'dev', p, 'enroll')
           # return only those files that are required by the given protocol
           mask = get_mask(self.m_base_dir, p, mask_type)
           for model_index in range(len(model_files)):
@@ -362,7 +362,7 @@ class Database(bob.db.verification.utils.Database):
 
           # select only that files that belong to the models of with the given ids,
           # or to any model if no model id is specified
-          model_files = get_list(self.m_base_dir, 'dev', p, 'enrol')
+          model_files = get_list(self.m_base_dir, 'dev', p, 'enroll')
           mask = get_mask(self.m_base_dir, p, mask_type)
 
           for model_index in range(len(model_files)):

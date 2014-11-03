@@ -98,14 +98,18 @@ class Interface(bob.db.base.driver.Interface):
     return pkg_resources.require('bob.db.%s' % self.name())[0].version
 
   def files(self):
+    """Returns the list of files required for this interface to work, which is empty."""
     from pkg_resources import resource_filename
     raw_files = ()
     return [resource_filename(__name__, k) for k in raw_files]
 
   def frgc_database_directory(self):
+    """Returnes the FRGC database base directory, where the original FRGC file lists (XML) are stored.
+    You might want to adapt this directory to your needs."""
     return '/idiap/resource/database/frgc/FRGC-2.0-dist'
 
   def type(self):
+    """Defines the type of the database, which is not SQL3, but text based"""
     return 'text'
 
   def add_commands(self, parser):
@@ -121,7 +125,7 @@ class Interface(bob.db.base.driver.Interface):
     dump_list_parser.add_argument('-e', '--extension', help="if given, this extension will be appended to every entry returned.")
     dump_list_parser.add_argument('-g', '--group', help="if given, this value will limit the output files to those belonging to a particular group.", choices=('world', 'dev'))
     dump_list_parser.add_argument('-p', '--protocol', default = '2.0.1', help="limits the dump to a particular subset of the data that corresponds to the given protocol.", choices=('2.0.1', '2.0.2', '2.0.4'))
-    dump_list_parser.add_argument('-u', '--purpose', help="if given, this value will limit the output files to those designed for the given purposes.", choices=('enrol', 'probe'))
+    dump_list_parser.add_argument('-u', '--purpose', help="if given, this value will limit the output files to those designed for the given purposes.", choices=('enroll', 'probe'))
     dump_list_parser.add_argument('--self-test', dest="selftest", action='store_true', help=argparse.SUPPRESS)
     dump_list_parser.set_defaults(func=dumplist) #action
 

@@ -1,64 +1,42 @@
-=============================================================
- The Face Recognition Grand Challenge (FRGC) ver2.0 Database
-=============================================================
+.. vim: set fileencoding=utf-8 :
+.. Manuel Guenther <manuel.guenther@idiap.ch>
+.. Fri Oct 31 14:18:57 CET 2014
 
-This package contains the access API and descriptions for `The Face Recognition Grand Challenge (FRGC) Database <http://face.nist.gov/frgc/>`_ in the version ver2.0.
-The actual raw data for the database should be downloaded from the original URL.
-This package only contains the `Bob <http://www.idiap.ch/software/bob/>`_ accessor methods to use the DB directly from python.
-Note that currently only the experimental protocols *2.0.1*, *2.0.2*, and *2.0.4* (as defined in the FRGC tests) are implemented.
+.. image:: http://img.shields.io/badge/docs-stable-yellow.png
+   :target: http://pythonhosted.org/bob.db.frgc/index.html
+.. image:: http://img.shields.io/badge/docs-latest-orange.png
+   :target: https://www.idiap.ch/software/bob/docs/latest/bioidiap/bob.db.frgc/master/index.html
+.. image:: https://travis-ci.org/bioidiap/bob.db.frgc.svg?branch=master
+   :target: https://travis-ci.org/bioidiap/bob.db.frgc
+.. image:: https://coveralls.io/repos/bioidiap/bob.db.frgc/badge.png
+   :target: https://coveralls.io/r/bioidiap/bob.db.frgc
+.. image:: https://img.shields.io/badge/github-master-0000c0.png
+   :target: https://github.com/bioidiap/bob.db.frgc/tree/master
+.. image:: http://img.shields.io/pypi/v/bob.db.frgc.png
+   :target: https://pypi.python.org/pypi/bob.db.frgc
+.. image:: http://img.shields.io/pypi/dm/bob.db.frgc.png
+   :target: https://pypi.python.org/pypi/bob.db.frgc
+.. image:: https://img.shields.io/badge/original-data--files-a000a0.png
+   :target: http://face.nist.gov/frgc/
 
-.. note::
+===========================================================================
+ Face Recognition Grand Challenge (FRGC) ver2.0 Database Interface for Bob
+===========================================================================
 
-  Since this database interface directly works with the file lists of the database directly, it requires the original image database to be available at your system.
-  In order for the database interface to work properly, you have to specify the correct path on each usage.
-  To avoid that, you can set the path in the ``Interface.frgc_database_directory()`` function of the ``bob/db/frgc/driver.py`` file to your FRGC image database main directory.
-  (Of course, you have to download the source package from git to do that, see below.)
-  For use at Idiap, the right directory is preset.
+This package contains an interface for the evaluation protocol of `The Face Recognition Grand Challenge (FRGC) Database <http://face.nist.gov/frgc/>`_ in the version ver2.0.
+This package does not contain the original FRGC data files, which need to be obtained through the link above.
 
-You would normally not install this package unless you are maintaining it.
-What you would do instead is to tie it in at the package you need to **use** it.
-There are a few ways to achieve this:
 
-1. You can add this package as a requirement at the ``setup.py`` for your own `satellite package <https://github.com/idiap/bob/wiki/Virtual-Work-Environments-with-Buildout>`_ or to your Buildout ``.cfg`` file, if you prefer it that way.
-   With this method, this package gets automatically downloaded and installed on your working environment, or
-2. You can manually download and install this package using commands like ``easy_install`` or ``pip``.
+Installation
+------------
+To install this package -- alone or together with other `Packages of Bob <https://github.com/idiap/bob/wiki/Packages>`_ -- please read the `Installation Instructions <https://github.com/idiap/bob/wiki/Installation>`_.
+For Bob_ to be able to work properly, some dependent packages are required to be installed.
+Please make sure that you have read the `Dependencies <https://github.com/idiap/bob/wiki/Dependencies>`_ for your operating system.
 
-The package is available in two different distribution formats:
+Documentation
+-------------
+For further documentation on this package, please read the `Stable Version <http://pythonhosted.org/bob.db.frgc/index.html>`_ or the `Latest Version <https://www.idiap.ch/software/bob/docs/latest/bioidiap/bob.db.frgc/master/index.html>`_ of the documentation.
+For a list of tutorials on this or the other packages ob Bob_, or information on submitting issues, asking questions and starting discussions, please visit its website.
 
-a) You can download it from `PyPI <http://pypi.python.org/pypi>`_, or
-b) You can download it in its source form from `its git repository <https://github.com/bioidiap/bob.db.frgc>`_.
+.. _bob: https://www.idiap.ch/software/bob
 
-You can mix and match points 1/2 and a/b above based on your requirements.
-Here are some examples:
-
-Modify your setup.py and download from PyPI
-===========================================
-
-That is the easiest.
-Edit your ``setup.py`` in your satellite package and add the following entry in the ``install_requires`` section::
-
-    install_requires=[
-      ...
-      "bob.db.frgc",
-    ],
-
-Proceed normally with your ``boostrap/buildout`` steps and you should be all set.
-That means you can now import the ``bob.db.frgc`` namespace into your scripts.
-
-Modify your buildout.cfg and download from git
-==============================================
-
-You will need to add a dependence to `mr.developer <http://pypi.python.org/pypi/mr.developer/>`_ to be able to install from our git repositories.
-Your ``buildout.cfg`` file should contain the following lines::
-
-  [buildout]
-  ...
-  extensions = mr.developer
-  auto-checkout = *
-  eggs = bob
-         ...
-         bob.db.frgc
-
-  [sources]
-  bob.db.frgc = git https://github.com/bioidiap/bob.db.frgc.git
-  ...

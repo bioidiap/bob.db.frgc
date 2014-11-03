@@ -60,13 +60,13 @@ def test_client_ids():
     assert len(db.client_ids(protocol=protocol)) == 535
     assert len(db.client_ids(groups='dev', protocol=protocol)) == 466
 
-  # for different mask types, the client counters of 'enrol' and 'probe' are different
+  # for different mask types, the client counters of 'enroll' and 'probe' are different
   for protocol in protocols:
-    assert len(db.client_ids(groups='dev', protocol=protocol, purposes='enrol', mask_type='maskI')) == 466
+    assert len(db.client_ids(groups='dev', protocol=protocol, purposes='enroll', mask_type='maskI')) == 466
     assert len(db.client_ids(groups='dev', protocol=protocol, purposes='probe', mask_type='maskI')) == 450
-    assert len(db.client_ids(groups='dev', protocol=protocol, purposes='enrol', mask_type='maskII')) == 466
+    assert len(db.client_ids(groups='dev', protocol=protocol, purposes='enroll', mask_type='maskII')) == 466
     assert len(db.client_ids(groups='dev', protocol=protocol, purposes='probe', mask_type='maskII')) == 461
-    assert len(db.client_ids(groups='dev', protocol=protocol, purposes='enrol', mask_type='maskIII')) == 370
+    assert len(db.client_ids(groups='dev', protocol=protocol, purposes='enroll', mask_type='maskIII')) == 370
     assert len(db.client_ids(groups='dev', protocol=protocol, purposes='probe', mask_type='maskIII')) == 345
 
   # check the number of models
@@ -101,10 +101,10 @@ def test_objects():
   for mask in masks:
     # the number of models and model files should be identical for protocol 1 and 4
     for protocol in ('2.0.1', '2.0.4'):
-      assert len(db.objects(groups='dev', protocol=protocol, purposes='enrol', mask_type=mask)) == len(db.model_ids(groups='dev', protocol=protocol, mask_type=mask))
+      assert len(db.objects(groups='dev', protocol=protocol, purposes='enroll', mask_type=mask)) == len(db.model_ids(groups='dev', protocol=protocol, mask_type=mask))
 
     # for protocol 2, there are 4 files for each model
-    assert len(db.objects(groups='dev', protocol='2.0.2', purposes='enrol', mask_type=mask)) == len(db.model_ids(groups='dev', protocol='2.0.2', mask_type=mask)) * 4
+    assert len(db.objects(groups='dev', protocol='2.0.2', purposes='enroll', mask_type=mask)) == len(db.model_ids(groups='dev', protocol='2.0.2', mask_type=mask)) * 4
 
   # the number of probes actually differ between the masks, and between the protocols
   assert len(db.objects(groups='dev', protocol='2.0.1', purposes='probe', mask_type='maskI')) == 14612
@@ -131,7 +131,7 @@ def test_object_sets():
   for mask in masks:
     # the number of models and model files should be identical for protocol 1 and 4
     # for protocol 2, there are the same number of models as object_sets
-    assert len(db.object_sets(groups='dev', protocol='2.0.2', purposes='enrol', mask_type=mask)) == len(db.model_ids(groups='dev', protocol='2.0.2', mask_type=mask))
+    assert len(db.object_sets(groups='dev', protocol='2.0.2', purposes='enroll', mask_type=mask)) == len(db.model_ids(groups='dev', protocol='2.0.2', mask_type=mask))
 
   # the number of probes actually differ between the masks, and between the protocols
   assert len(db.objects(groups='dev', protocol='2.0.2', purposes='probe', mask_type='maskI')) == 14612
@@ -156,7 +156,7 @@ def test_file_ids():
     # get the client id of the model
     client_id = db.get_client_id_from_model_id(model_id)
     # check that all files with the same model id share the same client id
-    for file in db.objects(groups='dev', protocol=protocol, model_ids=(model_id,), purposes='enrol'):
+    for file in db.objects(groups='dev', protocol=protocol, model_ids=(model_id,), purposes='enroll'):
       assert db.get_client_id_from_file_id(file.id) == client_id
 
 
@@ -178,6 +178,6 @@ def test_driver_api():
   # Tests the frgc driver API.
   from bob.db.base.script.dbmanage import main
   assert  main('frgc dumplist --self-test'.split()) == 0
-  assert  main('frgc dumplist --group=dev --protocol=2.0.4 --purpose=enrol --self-test'.split()) == 0
+  assert  main('frgc dumplist --group=dev --protocol=2.0.4 --purpose=enroll --self-test'.split()) == 0
   assert  main('frgc checkfiles --self-test'.split()) == 0
 

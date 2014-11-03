@@ -215,12 +215,12 @@ list_dir = "BEE_DIST/FRGC2.0/signature_sets/experiments"
 xml_files = {'world':'FRGC_Exp_2.0.1_Training.xml',
                'dev':{'2.0.1':'FRGC_Exp_2.0.1_Target.xml',
                       '2.0.2':'FRGC_Exp_2.0.2_Target.xml',
-                      '2.0.4':{'enrol':'FRGC_Exp_2.0.4_Target.xml',
+                      '2.0.4':{'enroll':'FRGC_Exp_2.0.4_Target.xml',
                                'probe':'FRGC_Exp_2.0.4_Query.xml'}}}
 
 # collector for lists that we already read.
 known_lists = {'world':None,
-               'dev':{'2.0.1':None, '2.0.2':None, '2.0.4':{'enrol':None, 'probe':None}}}
+               'dev':{'2.0.1':None, '2.0.2':None, '2.0.4':{'enroll':None, 'probe':None}}}
 
 # collector for files and models that have been read
 file_dict = {}

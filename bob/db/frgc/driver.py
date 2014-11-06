@@ -41,7 +41,7 @@ def dumplist(args):
     return 0
 
   from .query import Database
-  db = Database()
+  db = Database(args.database)
 
   r = db.objects(
       groups=args.group,
@@ -66,7 +66,7 @@ def checkfiles(args):
     return 0
 
   from .query import Database
-  db = Database()
+  db = Database(args.database)
 
   r = db.objects(mask_type = 'maskII') # here we take mask II since this is the combination of mask I and mask III
 

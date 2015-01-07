@@ -1,2 +1,2 @@
-include README.rst version.txt
+include README.rst bootstrap-buildout.py version.txt
 recursive-include doc *.py *.rst

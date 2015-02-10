@@ -195,7 +195,7 @@ def read_mask(mask_file):
     raise ValueError("The given mask file '" + mask_file + "' is invalid.")
 
   # read the mask size
-  queries, targets = f.readline().split(b' ')[1:]
+  queries, targets = f.readline().split(b' ')[1:3]
 
   # read mask
   mask = numpy.fromfile(f, dtype = numpy.uint8)
@@ -204,12 +204,16 @@ def read_mask(mask_file):
   return mask
 
 
+# directories inside the FRGC database
+list_dir = "BEE_DIST/%(v)sFRGC2.0/signature_sets/experiments"
+mask_dir = "BEE_DIST/%(v)sFRGC2.0/Experiment%(e)s/output"
+meta_data_dir = "BEE_DIST/%(v)sFRGC2.0/metadata"
+
+dir_variants = ('linux/FRGC/', '')
+
 
 ######################################################
 ##### lists ##########################################
-
-# list directory inside the FRGC database
-list_dir = "BEE_DIST/FRGC2.0/signature_sets/experiments"
 
 # the xml files for training, target and query
 xml_files = {'world':'FRGC_Exp_2.0.1_Training.xml',
@@ -232,11 +236,16 @@ def get_list(base_dir, group, protocol=None, purpose=None):
   def read_if_needed(file, list):
     """Reads the given list (if it has not been read yet) and fills the file and model dictionaries."""
     if not list:
-      if not os.path.exists(file):
-        raise xml.sax.SAXException("Could not find the list file '%s'. Your FRGC base directory '%s' seems to be wrong or incomplete."%(file, base_dir))
+      files = [file % {'v':v} for v in dir_variants]
+      found = None
+      for f in files:
+        if os.path.exists(f):
+          found = f
+      if found is None:
+        raise xml.sax.SAXException("Could not find the any of the list files '%s'. Your FRGC base directory '%s' seems to be wrong or incomplete."%(files, base_dir))
       handler = ListFileReader()
 #      print "Reading xml list '" + file + "'"
-      xml.sax.parse(file, handler)
+      xml.sax.parse(found, handler)
       list = handler.m_file_list
       # integrate in dicts
       for g in list:
@@ -273,8 +282,6 @@ def client_from_model(model_id):
 ###############################################################
 ##### masks ###################################################
 
-mask_dir = "BEE_DIST/FRGC2.0/Experiment%s/output"
-
 # static collector for the mask files
 known_masks = {'2.0.1':{'maskI':None, 'maskII':None, 'maskIII':None},
                '2.0.2':{'maskI':None, 'maskII':None, 'maskIII':None},
@@ -285,11 +292,14 @@ def get_mask(base_dir, protocol, mask_type):
   if mask_type is None:
     return None
   if known_masks[protocol][mask_type] is None:
-    mask_file = os.path.join(base_dir, mask_dir%(protocol[-1:],), mask_type + ".mtx")
-    if not os.path.exists(mask_file):
-      raise xml.sax.SAXException("Could not find the mask file '%s'. Your FRGC base directory '%s' seems to be wrong or incomplete."%(mask_file, base_dir))
-#    print "Reading mask file '" + mask_file + "'"
-    known_masks[protocol][mask_type] = read_mask(mask_file)
+    mask_files = [os.path.join(base_dir, mask_dir%{'v':v, 'e':protocol[-1:]}, mask_type + ".mtx") for v in dir_variants]
+    found = None
+    for f in mask_files:
+      if os.path.exists(f):
+        found = f
+    if found is None:
+      raise xml.sax.SAXException("Could not find any of the mask files '%s'. Your FRGC base directory '%s' seems to be wrong or incomplete."%(mask_files, base_dir))
+    known_masks[protocol][mask_type] = read_mask(found)
 
   return known_masks[protocol][mask_type]
 
@@ -308,13 +318,16 @@ def get_annotations(base_dir, file_id):
   # check if annotations need to be read
   if not annotations:
     # read annotations file
-    metadata_file = os.path.join(base_dir, "BEE_DIST/FRGC2.0/metadata/FRGC_2.0_Metadata.xml")
-    if not os.path.exists(metadata_file):
-      raise xml.sax.SAXException("Could not find the metadata file '%s'. Your FRGC base directory '%s' seems to be wrong or incomplete."%(metadata_file, base_dir))
+    metadata_files = [os.path.join(base_dir, meta_data_dir%{'v':v}, "FRGC_2.0_Metadata.xml") for v in dir_variants]
+    found = None
+    for f in metadata_files:
+      if os.path.exists(f):
+        found = f
+    if found is None:
+      raise xml.sax.SAXException("Could not find one of the metadata file '%s'. Your FRGC base directory '%s' seems to be wrong or incomplete."%(metadata_files, base_dir))
 #    print "Reading positions file '" + metadata_file + "'"
     annotation_reader = AnnotationFileReader()
-    xml.sax.parse(metadata_file, annotation_reader)
+    xml.sax.parse(found, annotation_reader)
     annotations = annotation_reader.m_annotation_map
 
   return annotations[file_id]
-

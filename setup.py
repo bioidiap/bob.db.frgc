@@ -3,7 +3,11 @@
 # author: Manuel Guenther <manuel.guenther@idiap.ch>
 # date:   Wed Feb 13 12:35:29 CET 2013
 
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages, dist
+dist.Distribution(dict(setup_requires=['bob.extension']))
+
+from bob.extension.utils import load_requirements
+install_requires = load_requirements()
 
 # Define package version
 version = open("version.txt").read().rstrip()
@@ -26,12 +30,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
 
-    install_requires=[
-      'setuptools',
-      'six',  # py2/3 compatibility library
-      'bob.db.base',
-      'bob.db.verification.utils' # defines a set of utilities for face verification databases like this one.
-    ],
+    install_requires = install_requires,
 
     namespace_packages = [
       'bob',

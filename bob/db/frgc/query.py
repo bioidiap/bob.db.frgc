@@ -28,6 +28,9 @@ interface = Interface()
 
 import bob.db.verification.utils
 
+import logging
+logger = logging.getLogger("bob.db.frgc")
+
 import os
 import six
 
@@ -36,17 +39,15 @@ class Database(bob.db.verification.utils.Database):
   using the common bob.db API.
   """
 
-  def __init__(self, base_dir = interface.frgc_database_directory(), original_extension = '.jpg'):
+  def __init__(self, original_directory = interface.frgc_database_directory(), original_extension = '.jpg'):
     # NOTE: For some images, the image extension is '.JPG' instead.
     # this interface will keep track of this automatically and always return the correct image name
 
-    # call base class constructor
-    bob.db.verification.utils.Database.__init__(self, original_directory=base_dir, original_extension=original_extension)
+    if not os.path.exists(original_directory):
+      logger.warn("The database directory '%s' does not exist. Please choose the correct path, or correct the path in the Interface.frgc_database_directory() function of the bob/db/frgc/driver.py file.", original_directory)
 
-    self.m_base_dir = base_dir
-    # check that the database directory exists
-    if not os.path.exists(self.m_base_dir):
-      raise ValueError("The database directory '%s' does not exist. Please choose the correct path, or correct the path in the Interface.frgc_database_directory() function of the bob/db/frgc/driver.py file."%base_dir)
+    # call base class constructor
+    bob.db.verification.utils.Database.__init__(self, original_directory=original_directory, original_extension=original_extension)
 
     self.m_groups  = ('world', 'dev')
     self.m_purposes = ('enroll', 'probe')
@@ -99,7 +100,7 @@ class Database(bob.db.verification.utils.Database):
     retval = set()
 
     if 'world' in groups:
-      for file in get_list(self.m_base_dir, 'world'):
+      for file in get_list(self.original_directory, 'world'):
         retval.add(file.m_signature)
 
     if 'dev' in groups:
@@ -110,17 +111,17 @@ class Database(bob.db.verification.utils.Database):
         mask_type = self.check_parameter_for_validity(mask_type, "mask type", self.m_mask_types)
 
       # take only those models/probes that are really required by the current mask
-      mask = get_mask(self.m_base_dir, protocol, mask_type)
+      mask = get_mask(self.original_directory, protocol, mask_type)
 
       if 'enroll' in purposes:
-        files = get_list(self.m_base_dir, 'dev', protocol, purpose='enroll')
+        files = get_list(self.original_directory, 'dev', protocol, purpose='enroll')
         for index in range(len(files)):
           # check if this model is used by the mask
           if mask is None or (mask[:,index] > 0).any():
             retval.add(files[index].m_signature)
 
       if 'probe' in purposes:
-        files = get_list(self.m_base_dir, 'dev', protocol, purpose='probe')
+        files = get_list(self.original_directory, 'dev', protocol, purpose='probe')
         for index in range(len(files)):
           # check if this probe is used by the mask
           if mask is None or (mask[index,:] > 0).any():
@@ -159,16 +160,16 @@ class Database(bob.db.verification.utils.Database):
 
     retval = set()
     if 'world' in groups:
-      for file in get_list(self.m_base_dir, 'world'):
+      for file in get_list(self.original_directory, 'world'):
         retval.add(file.m_model)
 
     if 'dev' in groups:
       protocol = self.check_parameter_for_validity(protocol, "protocol", self.m_protocols)
       if mask_type is not None:
         mask_type = self.check_parameter_for_validity(mask_type, "mask type", self.m_mask_types)
-      files = get_list(self.m_base_dir, 'dev', protocol, purpose)
+      files = get_list(self.original_directory, 'dev', protocol, purpose)
       # take only those models that are really required by the current mask
-      mask = get_mask(self.m_base_dir, protocol, mask_type)
+      mask = get_mask(self.original_directory, protocol, mask_type)
       for index in range(len(files)):
         if mask is None or (mask[:,index] > 0).any():
           retval.add(files[index].m_model)
@@ -253,7 +254,7 @@ class Database(bob.db.verification.utils.Database):
 
     if 'world' in groups:
       # extract training files
-      for file in get_list(self.m_base_dir, 'world'):
+      for file in get_list(self.original_directory, 'world'):
         if not model_ids or file.m_signature in model_ids:
           for id, path in list(file.m_files.items()):
             extend_files(files, file)
@@ -267,9 +268,9 @@ class Database(bob.db.verification.utils.Database):
       for p in protocols:
         # extract dev files
         if 'enroll' in purposes:
-          model_files = get_list(self.m_base_dir, 'dev', p, 'enroll')
+          model_files = get_list(self.original_directory, 'dev', p, 'enroll')
           # return only those files that are required by the given protocol
-          mask = get_mask(self.m_base_dir, p, mask_type)
+          mask = get_mask(self.original_directory, p, mask_type)
           for model_index in range(len(model_files)):
             model = model_files[model_index]
             if not model_ids or model.m_model in model_ids:
@@ -278,14 +279,14 @@ class Database(bob.db.verification.utils.Database):
                 extend_files(files, model)
 
         if 'probe' in purposes:
-          probe_files = get_list(self.m_base_dir, 'dev', p, 'probe')
+          probe_files = get_list(self.original_directory, 'dev', p, 'probe')
           # assure that every probe file is returned only once
           probe_indices = list(range(len(probe_files)))
 
           # select only that files that belong to the models of with the given ids,
           # or to any model if no model id is specified
-          model_files = get_list(self.m_base_dir, 'dev', p, 'enroll')
-          mask = get_mask(self.m_base_dir, p, mask_type)
+          model_files = get_list(self.original_directory, 'dev', p, 'enroll')
+          mask = get_mask(self.original_directory, p, mask_type)
 
           for model_index in range(len(model_files)):
             model = model_files[model_index]
@@ -345,9 +346,9 @@ class Database(bob.db.verification.utils.Database):
       for p in protocols:
         # extract dev files
         if 'enroll' in purposes:
-          model_files = get_list(self.m_base_dir, 'dev', p, 'enroll')
+          model_files = get_list(self.original_directory, 'dev', p, 'enroll')
           # return only those files that are required by the given protocol
-          mask = get_mask(self.m_base_dir, p, mask_type)
+          mask = get_mask(self.original_directory, p, mask_type)
           for model_index in range(len(model_files)):
             model = model_files[model_index]
             if not model_ids or model.m_model in model_ids:
@@ -356,14 +357,14 @@ class Database(bob.db.verification.utils.Database):
                 extend_files(files, model)
 
         if 'probe' in purposes:
-          probe_files = get_list(self.m_base_dir, 'dev', p, 'probe')
+          probe_files = get_list(self.original_directory, 'dev', p, 'probe')
           # assure that every probe file is returned only once
           probe_indices = list(range(len(probe_files)))
 
           # select only that files that belong to the models of with the given ids,
           # or to any model if no model id is specified
-          model_files = get_list(self.m_base_dir, 'dev', p, 'enroll')
-          mask = get_mask(self.m_base_dir, p, mask_type)
+          model_files = get_list(self.original_directory, 'dev', p, 'enroll')
+          mask = get_mask(self.original_directory, p, mask_type)
 
           for model_index in range(len(model_files)):
             model = model_files[model_index]
@@ -379,5 +380,4 @@ class Database(bob.db.verification.utils.Database):
 
   def annotations(self, file):
     """Returns the annotations for the given file as a dictionary {'reye':(y,x), 'leye':(y,x), 'mouth':(y,x), 'nose':(y,x)}."""
-    return get_annotations(self.m_base_dir, file.id)
-
+    return get_annotations(self.original_directory, file.id)

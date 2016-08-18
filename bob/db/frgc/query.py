@@ -26,7 +26,7 @@ from .models import get_list, get_mask, get_annotations, client_from_file, clien
 from .driver import Interface
 interface = Interface()
 
-import bob.db.verification.utils
+import bob.db.base
 
 import logging
 logger = logging.getLogger("bob.db.frgc")
@@ -34,7 +34,7 @@ logger = logging.getLogger("bob.db.frgc")
 import os
 import six
 
-class Database(bob.db.verification.utils.Database):
+class Database(bob.db.base.Database):
   """The Database class reads the original XML lists and provides access
   using the common bob.db API.
   """
@@ -47,7 +47,10 @@ class Database(bob.db.verification.utils.Database):
       logger.warn("The database directory '%s' does not exist. Please choose the correct path, or correct the path in the Interface.frgc_database_directory() function of the bob/db/frgc/driver.py file.", original_directory)
 
     # call base class constructor
-    bob.db.verification.utils.Database.__init__(self, original_directory=original_directory, original_extension=original_extension)
+    super(Database, self).__init__()
+    self.original_directory = original_directory
+    self.original_extension = original_extension
+
 
     self.m_groups  = ('world', 'dev')
     self.m_purposes = ('enroll', 'probe')

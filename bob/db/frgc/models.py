@@ -24,14 +24,15 @@ import xml.sax
 import os
 import numpy
 
-import bob.db.verification.utils
+import bob.db.base
 
-class File (bob.db.verification.utils.File):
+class File (bob.db.base.File):
   """This class is just the File object that is returned by the objects function.
   It will be created on need and is not stored anywhere."""
   def __init__(self, signature, presentation, path):
     # just call the base class constructor
-    bob.db.verification.utils.File.__init__(self, file_id = presentation, client_id = signature, path = path)
+    bob.db.base.File.__init__(self, file_id = presentation, path = path)
+    self.client_id = signature
 
   # overwrite default make_path behaviour
   def make_path(self, directory=None, extension=None):

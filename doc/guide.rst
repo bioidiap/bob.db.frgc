@@ -30,7 +30,7 @@ This saves some time and space, but ensures identical results.
 The Database Interface
 ----------------------
 
-The :py:class:`bob.db.frgc.Database` complies with the standard biometric verification database as described in :ref:`commons`, implementing the interface :py:class:`bob.db.verification.utils.Database`.
+The :py:class:`bob.db.frgc.Database` complies with the standard biometric verification database as described in :ref:`commons`, implementing the interface :py:class:`bob.db.base.Database`.
 
 .. todo::
    Explain the particularities of the :py:class:`bob.db.frgc.Database`.

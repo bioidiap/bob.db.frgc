@@ -1,4 +1,3 @@
 setuptools
 six
 bob.db.base
-bob.db.verification.utils

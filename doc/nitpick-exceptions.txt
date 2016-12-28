@@ -1,4 +1,4 @@
-py:class bob.db.base.file.File
-py:class bob.db.base.database.SQLiteDatabase
-py:class bob.db.base.database.Database
 py:class sqlalchemy.ext.declarative.api.Base
+
+# these are not visible in Python 2.7, but work fine in Python 3.x
+py:exc ValueError

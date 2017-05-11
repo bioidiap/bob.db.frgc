@@ -18,28 +18,29 @@ logger = logging.getLogger("bob.db.frgc")
 import os
 import six
 
+
 class Database(bob.db.base.Database):
   """The Database class reads the original XML lists and provides access
   using the common bob.db API.
   """
 
-  def __init__(self, original_directory = interface.frgc_database_directory(), original_extension = '.jpg'):
+  def __init__(self, original_directory=interface.frgc_database_directory(), original_extension='.jpg'):
     # NOTE: For some images, the image extension is '.JPG' instead.
-    # this interface will keep track of this automatically and always return the correct image name
+    # this interface will keep track of this automatically and always return
+    # the correct image name
 
     if not os.path.exists(original_directory):
       logger.warn("The database directory '%s' does not exist. Please choose the correct path, or correct the path in the Interface.frgc_database_directory() function of the bob/db/frgc/driver.py file.", original_directory)
 
     # call base class constructor
-    super(Database, self).__init__()
-    self.original_directory = original_directory
-    self.original_extension = original_extension
+    super(Database, self).__init__(original_directory, original_extension)
 
-
-    self.m_groups  = ('world', 'dev')
+    self.m_groups = ('world', 'dev')
     self.m_purposes = ('enroll', 'probe')
-    self.m_protocols = ('2.0.1', '2.0.2', '2.0.4') # other protocols might be supported later.
-    self.m_mask_types = ('maskI', 'maskII', 'maskIII') # usually, only maskIII (the most difficult one) is used.
+    # other protocols might be supported later.
+    self.m_protocols = ('2.0.1', '2.0.2', '2.0.4')
+    # usually, only maskIII (the most difficult one) is used.
+    self.m_mask_types = ('maskI', 'maskII', 'maskIII')
 
   def groups(self, protocol=None):
     """Returns a list of groups for the given protocol
@@ -56,9 +57,9 @@ class Database(bob.db.base.Database):
   def provides_file_set_for_protocol(self, protocol):
     """Returns True for every protocol for which file sets (instead of single files) are used for enrollment and probing.
     Currently, this is only the '2.0.2', protocol."""
-    protocol = self.check_parameter_for_validity(protocol, 'protocol', self.m_protocols)
+    protocol = self.check_parameter_for_validity(
+        protocol, 'protocol', self.m_protocols)
     return protocol == '2.0.2'
-
 
   def client_ids(self, groups=None, protocol=None, purposes=None, mask_type='maskIII'):
     """Returns a list of client ids for the specific query by the user.
@@ -92,30 +93,35 @@ class Database(bob.db.base.Database):
 
     if 'dev' in groups:
       # validity checks
-      purposes = self.check_parameters_for_validity(purposes, "purpose", self.m_purposes)
-      protocol = self.check_parameter_for_validity(protocol, "protocol", self.m_protocols)
+      purposes = self.check_parameters_for_validity(
+          purposes, "purpose", self.m_purposes)
+      protocol = self.check_parameter_for_validity(
+          protocol, "protocol", self.m_protocols)
       if mask_type is not None:
-        mask_type = self.check_parameter_for_validity(mask_type, "mask type", self.m_mask_types)
+        mask_type = self.check_parameter_for_validity(
+            mask_type, "mask type", self.m_mask_types)
 
-      # take only those models/probes that are really required by the current mask
+      # take only those models/probes that are really required by the current
+      # mask
       mask = get_mask(self.original_directory, protocol, mask_type)
 
       if 'enroll' in purposes:
-        files = get_list(self.original_directory, 'dev', protocol, purpose='enroll')
+        files = get_list(self.original_directory, 'dev',
+                         protocol, purpose='enroll')
         for index in range(len(files)):
           # check if this model is used by the mask
-          if mask is None or (mask[:,index] > 0).any():
+          if mask is None or (mask[:, index] > 0).any():
             retval.add(files[index].m_signature)
 
       if 'probe' in purposes:
-        files = get_list(self.original_directory, 'dev', protocol, purpose='probe')
+        files = get_list(self.original_directory, 'dev',
+                         protocol, purpose='probe')
         for index in range(len(files)):
           # check if this probe is used by the mask
-          if mask is None or (mask[index,:] > 0).any():
+          if mask is None or (mask[index, :] > 0).any():
             retval.add(files[index].m_signature)
 
     return sorted(list(retval))
-
 
   def model_ids(self, groups=None, protocol=None, mask_type='maskIII'):
     """Returns a set of model ids for the specific query by the user.
@@ -151,18 +157,19 @@ class Database(bob.db.base.Database):
         retval.add(file.m_model)
 
     if 'dev' in groups:
-      protocol = self.check_parameter_for_validity(protocol, "protocol", self.m_protocols)
+      protocol = self.check_parameter_for_validity(
+          protocol, "protocol", self.m_protocols)
       if mask_type is not None:
-        mask_type = self.check_parameter_for_validity(mask_type, "mask type", self.m_mask_types)
+        mask_type = self.check_parameter_for_validity(
+            mask_type, "mask type", self.m_mask_types)
       files = get_list(self.original_directory, 'dev', protocol, purpose)
       # take only those models that are really required by the current mask
       mask = get_mask(self.original_directory, protocol, mask_type)
       for index in range(len(files)):
-        if mask is None or (mask[:,index] > 0).any():
+        if mask is None or (mask[:, index] > 0).any():
           retval.add(files[index].m_model)
 
     return sorted(list(retval))
-
 
   def get_client_id_from_model_id(self, model_id, **kwargs):
     """Returns the client_id attached to the given model_id.
@@ -180,7 +187,6 @@ class Database(bob.db.base.Database):
     """
     return client_from_model(model_id)
 
-
   def get_client_id_from_file_id(self, file_id, **kwargs):
     """Returns the client_id (real client id) attached to the given file_id
 
@@ -192,7 +198,6 @@ class Database(bob.db.base.Database):
     Returns: The client_id attached to the given file_id
     """
     return client_from_file(file_id)
-
 
   def objects(self, groups=None, protocol=None, purposes=None, model_ids=None, mask_type='maskIII'):
     """Using the specified restrictions, this function returns a list of File objects.
@@ -227,12 +232,14 @@ class Database(bob.db.base.Database):
     def extend_files(files, frgc_file):
       """Extends the given file list with File's created from the given FRGCFile."""
       for presentation in frgc_file.m_files:
-        files[presentation] = File(frgc_file.m_signature, presentation, frgc_file.m_files[presentation])
+        files[presentation] = File(
+            frgc_file.m_signature, presentation, frgc_file.m_files[presentation])
 
     # check that every parameter is as expected
     groups = self.check_parameters_for_validity(groups, "group", self.m_groups)
     # we allow to specify more protocols here, just
-    protocols = self.check_parameters_for_validity(protocol, "protocol", self.m_protocols)
+    protocols = self.check_parameters_for_validity(
+        protocol, "protocol", self.m_protocols)
 
     if isinstance(model_ids, six.integer_types):
       model_ids = (model_ids,)
@@ -249,8 +256,10 @@ class Database(bob.db.base.Database):
     if 'dev' in groups:
       # check protocol, mask, and purposes only in group dev
       if mask_type is not None:
-        mask_type = self.check_parameter_for_validity(mask_type, "mask type", self.m_mask_types)
-      purposes = self.check_parameters_for_validity(purposes, "purpose", self.m_purposes)
+        mask_type = self.check_parameter_for_validity(
+            mask_type, "mask type", self.m_mask_types)
+      purposes = self.check_parameters_for_validity(
+          purposes, "purpose", self.m_purposes)
 
       for p in protocols:
         # extract dev files
@@ -262,7 +271,7 @@ class Database(bob.db.base.Database):
             model = model_files[model_index]
             if not model_ids or model.m_model in model_ids:
               # test if the model is used by this mask
-              if mask is None or (mask[:,model_index] > 0).any():
+              if mask is None or (mask[:, model_index] > 0).any():
                 extend_files(files, model)
 
         if 'probe' in purposes:
@@ -285,7 +294,6 @@ class Database(bob.db.base.Database):
                   probe_indices.remove(probe_index)
 
     return [files[presentation] for presentation in sorted(files.keys())]
-
 
   def object_sets(self, groups=None, protocol='2.0.2', purposes=None, model_ids=None, mask_type='maskIII'):
     """Using the specified restrictions, this function returns a list of FileSet objects.
@@ -317,7 +325,8 @@ class Database(bob.db.base.Database):
     # check that every parameter is as expected
     groups = self.check_parameters_for_validity(groups, "group", ('dev',))
     # we allow to specify more protocols here, just
-    protocols = self.check_parameters_for_validity(protocol, "protocol", ('2.0.2',))
+    protocols = self.check_parameters_for_validity(
+        protocol, "protocol", ('2.0.2',))
 
     if isinstance(model_ids, six.integer_types):
       model_ids = (model_ids,)
@@ -327,8 +336,10 @@ class Database(bob.db.base.Database):
     if 'dev' in groups:
       # check protocol, mask, and purposes only in group dev
       if mask_type is not None:
-        mask_type = self.check_parameter_for_validity(mask_type, "mask type", self.m_mask_types)
-      purposes = self.check_parameters_for_validity(purposes, "purpose", self.m_purposes)
+        mask_type = self.check_parameter_for_validity(
+            mask_type, "mask type", self.m_mask_types)
+      purposes = self.check_parameters_for_validity(
+          purposes, "purpose", self.m_purposes)
 
       for p in protocols:
         # extract dev files
@@ -340,7 +351,7 @@ class Database(bob.db.base.Database):
             model = model_files[model_index]
             if not model_ids or model.m_model in model_ids:
               # test if the model is used by this mask
-              if mask is None or (mask[:,model_index] > 0).any():
+              if mask is None or (mask[:, model_index] > 0).any():
                 extend_files(files, model)
 
         if 'probe' in purposes:
@@ -363,7 +374,6 @@ class Database(bob.db.base.Database):
                   probe_indices.remove(probe_index)
 
     return [files[file_set_id] for file_set_id in sorted(files.keys())]
-
 
   def annotations(self, file):
     """Returns the annotations for the given file as a dictionary {'reye':(y,x), 'leye':(y,x), 'mouth':(y,x), 'nose':(y,x)}."""

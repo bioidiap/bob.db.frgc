@@ -7,6 +7,8 @@
    :target: https://www.idiap.ch/software/bob/docs/latest/bob/bob.db.frgc/master/index.html
 .. image:: https://gitlab.idiap.ch/bob/bob.db.frgc/badges/master/build.svg
    :target: https://gitlab.idiap.ch/bob/bob.db.frgc/commits/master
+.. image:: https://gitlab.idiap.ch/bob/bob.db.frgc/badges/master/coverage.svg
+   :target: https://gitlab.idiap.ch/bob/bob.db.frgc/commits/master
 .. image:: https://img.shields.io/badge/gitlab-project-0000c0.svg
    :target: https://gitlab.idiap.ch/bob/bob.db.frgc
 .. image:: http://img.shields.io/pypi/v/bob.db.frgc.svg
@@ -29,11 +31,10 @@ It worth noting that this package does not contain the original FRGC data files,
 Installation
 ------------
 
-Follow our `installation`_ instructions. Then, using the Python interpreter
-provided by the distribution, bootstrap and buildout this package::
+Complete Bob's `installation`_ instructions. Then, to install this pacakge,
+run::
 
-  $ python bootstrap-buildout.py
-  $ ./bin/buildout
+  $ conda install bob.db.frgc
 
 
 Contact

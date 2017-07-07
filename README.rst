@@ -2,9 +2,9 @@
 .. Thu 18 Aug 14:10:40 CEST 2016
 
 .. image:: http://img.shields.io/badge/docs-stable-yellow.svg
-   :target: http://pythonhosted.org/bob.db.frgc/index.html
+   :target: https://www.idiap.ch/software/bob/docs/bob/bob.db.frgc/stable/index.html
 .. image:: http://img.shields.io/badge/docs-latest-orange.svg
-   :target: https://www.idiap.ch/software/bob/docs/latest/bob/bob.db.frgc/master/index.html
+   :target: https://www.idiap.ch/software/bob/docs/bob/bob.db.frgc/master/index.html
 .. image:: https://gitlab.idiap.ch/bob/bob.db.frgc/badges/master/build.svg
    :target: https://gitlab.idiap.ch/bob/bob.db.frgc/commits/master
 .. image:: https://gitlab.idiap.ch/bob/bob.db.frgc/badges/master/coverage.svg
@@ -12,8 +12,6 @@
 .. image:: https://img.shields.io/badge/gitlab-project-0000c0.svg
    :target: https://gitlab.idiap.ch/bob/bob.db.frgc
 .. image:: http://img.shields.io/pypi/v/bob.db.frgc.svg
-   :target: https://pypi.python.org/pypi/bob.db.frgc
-.. image:: http://img.shields.io/pypi/dm/bob.db.frgc.svg
    :target: https://pypi.python.org/pypi/bob.db.frgc
 .. image:: https://img.shields.io/badge/original-data--files-a000a0.png
    :target: http://face.nist.gov/frgc/
@@ -31,7 +29,7 @@ It worth noting that this package does not contain the original FRGC data files,
 Installation
 ------------
 
-Complete Bob's `installation`_ instructions. Then, to install this pacakge,
+Complete Bob's `installation`_ instructions. Then, to install this package,
 run::
 
   $ conda install bob.db.frgc

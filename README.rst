@@ -1,14 +1,14 @@
 .. vim: set fileencoding=utf-8 :
 .. Thu 18 Aug 14:10:40 CEST 2016
 
-.. image:: http://img.shields.io/badge/docs-v2.1.7-yellow.svg
-   :target: https://www.idiap.ch/software/bob/docs/bob/bob.db.frgc/v2.1.7/index.html
+.. image:: http://img.shields.io/badge/docs-stable-yellow.svg
+   :target: https://www.idiap.ch/software/bob/docs/bob/bob.db.frgc/stable/index.html
 .. image:: http://img.shields.io/badge/docs-latest-orange.svg
    :target: https://www.idiap.ch/software/bob/docs/bob/bob.db.frgc/master/index.html
-.. image:: https://gitlab.idiap.ch/bob/bob.db.frgc/badges/v2.1.7/build.svg
-   :target: https://gitlab.idiap.ch/bob/bob.db.frgc/commits/v2.1.7
-.. image:: https://gitlab.idiap.ch/bob/bob.db.frgc/badges/v2.1.7/coverage.svg
-   :target: https://gitlab.idiap.ch/bob/bob.db.frgc/commits/v2.1.7
+.. image:: https://gitlab.idiap.ch/bob/bob.db.frgc/badges/master/build.svg
+   :target: https://gitlab.idiap.ch/bob/bob.db.frgc/commits/master
+.. image:: https://gitlab.idiap.ch/bob/bob.db.frgc/badges/master/coverage.svg
+   :target: https://gitlab.idiap.ch/bob/bob.db.frgc/commits/master
 .. image:: https://img.shields.io/badge/gitlab-project-0000c0.svg
    :target: https://gitlab.idiap.ch/bob/bob.db.frgc
 .. image:: http://img.shields.io/pypi/v/bob.db.frgc.svg
